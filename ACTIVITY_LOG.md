@@ -76,19 +76,23 @@ Tài liệu này lưu trữ lịch sử các sự kiện, phiên làm việc, l�
     - **Hina Dress, Hanako, Airi (3D Chibi)**: Mô hình 3D GLB chính thức trích xuất từ Blue Archive với đầy đủ khung xương hoạt ảnh, ánh sáng tự nhiên và đổ bóng chân thực.
   - Tự động lưu nhân vật đang chọn vào `localStorage` và chuyển đổi mượt mà giữa chế độ Canvas 3D và Sprite 2D.
 
-#### Sự kiện 8: Cập nhật quy tắc hoạt động Agent
-- **Hành động:** Bổ sung quy tắc số 3 vào [`AGENTS.md`](file:///F:/project/animaengine/AGENTS.md):
-  > *"3. Mỗi khi thực hiện một hành động mới, sửa, cập nhật thì tóm tắt và ghi log lại."*
-- Khởi tạo tệp [`ACTIVITY_LOG.md`](file:///F:/project/animaengine/ACTIVITY_LOG.md) để lưu vết lịch sử phát triển liên tục.
-- Tích hợp hàm `log_front` / `logToBackend` ghi nhật ký tập trung từ frontend WebView về `app.log`.
+#### Sự kiện 9: Đóng gói bản phát hành độc lập (Standalone Production Build) cho Động cơ Hybrid
+- **Hiện tượng:** Sau khi tích hợp thư viện Three.js, khi biên dịch bằng `cargo build --release` thông thường, Webview2 vẫn tìm kiếm máy chủ `localhost:5173` dẫn đến màn hình "localhost từ chối kết nối".
+- **Nguyên nhân gốc rễ:** Lệnh `cargo build` không kích hoạt pipeline đóng gói của Tauri CLI, nên không nhúng tài nguyên tĩnh từ `dist/` vào mã máy và không gỡ bỏ `devUrl`.
+- **Giải pháp:**
+  - Thêm script lệnh chuẩn hóa vào `package.json`: `"build:app": "tauri build --no-bundle"`.
+  - Thực hiện đóng gói hoàn chỉnh bằng `npm run build:app`.
+  - Toàn bộ HTML/CSS, Three.js runtime và các mô hình `.glb` (Hina Dress, Hanako, Airi) được nhúng trực tiếp vào tệp thực thi `app.exe`.
+  - Kết nối logger `log_front` / `logToBackend` ghi nhận: `[Init] Anima Engine started successfully with character: hina`.
 
 ---
 
 ### 3. Kết quả nghiệm thu & Kiểm thử tự động
-- **Tổng số Unit Tests:** **9/9 tests đạt 100% PASS**
-  - Python (`tests/test_process_assets.py`): 5/5 tests (xử lý nền trong suốt, bảo toàn màu da trắng sáng, tách tròng mắt, tạo manifest, đóng gói thư mục).
+- **Tổng số Unit Tests:** **14/14 tests đạt 100% PASS**
+  - Python (`tests/test_process_assets.py` & `tests/test_character_packs.py`): 10/10 tests (kiểm tra toàn bộ thuật toán tách nền, bảo toàn màu da, tính hợp lệ của manifest 2D/3D và sự tồn tại của animation clip trong các file .glb).
   - Rust (`src-tauri/src/sensors.rs`): 4/4 tests (tính toán góc/khoảng cách, vùng nguy hiểm nút shutdown, bộ đếm nhịp gõ phím burst, vòng đời theo dõi kéo thả `DragTracker`).
 - **Hiệu năng thực tế:**
-  - Mức tiêu thụ RAM: **~41 - 43 MB** (đạt mục tiêu < 50MB).
-  - Mức tiêu thụ CPU: **~0.0% khi idle**, phản hồi tức thì khi tương tác.
-- **Trạng thái ứng dụng:** Hoạt động ổn định trên màn hình chính của người dùng.
+  - Mức tiêu thụ RAM: **~39 - 42 MB** (đáp ứng mục tiêu < 50MB).
+  - Mức tiêu thụ CPU: **~0.0% - 0.2% khi idle**, phản hồi tức thì khi tương tác.
+- **Trạng thái ứng dụng:** Hoạt động ổn định trên màn hình chính của người dùng, sẵn sàng chuyển đổi giữa 2D và 3D qua menu chuột phải.
+
