@@ -199,9 +199,54 @@ Thư mục nhân vật mặc định: `characters/phoebe_chibi/manifest.json`:
 }
 ```
 
+## 5. Quy Trình Sản Xuất & Xử Lý Asset Từ LoRA (`phoebe_chibi_anima_v1.safetensors`)
+
+Quy trình chuẩn để chuyển đổi từ mô hình AI sang asset game siêu nhẹ:
+
+```mermaid
+flowchart TD
+    LoRA["phoebe_chibi_anima_v1.safetensors<br>(Dim: 64, Alpha: 64, Res: 1024x1024)"] --> WebUI["WebUI / ComfyUI / Diffusers<br>(Base: anima-base-v1.0)"]
+    WebUI --> RawImages["4 Ảnh Render Thô (Nền Trắng)<br>(idle, typing, panic, dragged)"]
+    RawImages --> PyScript["Script Tự Động: tools/process_assets.py<br>(Tách nền Alpha trong suốt + Cắt lớp tròng mắt)"]
+    PyScript --> FinalPack["Gói Asset Chuẩn: characters/phoebe_chibi/<br>(base.png, pupil.png, typing.png, panic.png, drag.png)"]
+```
+
+### 5.1. Thông số Cấu hình Render từ LoRA
+* **Base Model:** `anima-base-v1.0.safetensors` (hoặc checkpoint Anime tương thích).
+* **Độ phân giải:** $1024 \times 1024$ (tỉ lệ 1:1 chuẩn chibi).
+* **LoRA Weight:** `0.8 - 1.0` (Trigger chính: `phoebe_chibi`).
+* **Sampler:** DPM++ 2M Karras hoặc Euler a, Steps: 24–30, CFG Scale: 6.0–7.0.
+
+### 5.2. Bộ Prompt Chuẩn Cho 4 Trạng Thái Cốt Lõi
+
+1. **Trạng thái Nghỉ & Nhìn theo chuột (`idle.png`):**
+   * **Positive:** `masterpiece, best quality, 1girl, phoebe_chibi, cute chibi emoji style, blonde bangs, white hat, blue cross hair clip, purple eyes, gentle smile, standing, simple white background`
+   * **Negative:** `low quality, worst quality, blurry, text, watermark, realistic, 3d, complex background, dark background`
+
+2. **Trạng thái Gõ phím / Cổ vũ (`typing.png`):**
+   * **Positive:** `masterpiece, best quality, 1girl, phoebe_chibi, cute meme chibi style, bright white circular eye highlights, smug proud expression, cheering, raising hands, holding mini golden bell, simple white background`
+   * **Negative:** `low quality, worst quality, complex background, text, cropped`
+
+3. **Trạng thái Hoảng sợ khi chuột vào Shutdown (`panic.png`):**
+   * **Positive:** `masterpiece, best quality, 1girl, phoebe_chibi, dazed confused pose, crying, teary purple eyes, opened mouth, raised inner eyebrows, waving hands, panic expression, simple white background`
+   * **Negative:** `low quality, worst quality, complex background, smile, calm`
+
+4. **Trạng thái Bị nhấc lơ lửng (`dragged.png`):**
+   * **Positive:** `masterpiece, best quality, 1girl, phoebe_chibi, dangling pose, suspended in air, kicking legs, surprised pouty expression, flustered, simple white background`
+   * **Negative:** `low quality, worst quality, standing on floor, complex background`
+
+### 5.3. Kịch Bản Hậu Kỳ Tự Động (Post-Processing Pipeline)
+Một script Python chuyên dụng (`tools/process_assets.py`) được xây dựng để thực hiện tự động:
+1. **Chuyển đổi sang Transparent RGBA:** Loại bỏ nền trắng thành nền trong suốt hoàn hảo.
+2. **Bóc tách tròng mắt cho tính năng Eye Tracking:**
+   * Từ bức ảnh `idle.png`, xác định bounding box của 2 mắt.
+   * Cắt rời cặp tròng mắt tím lưu thành `animations/eyes/pupil.png`.
+   * Tô phủ lòng trắng / làm rỗng hốc mắt trên khuôn mặt gốc, lưu thành `animations/eyes/base.png`.
+3. **Đồng bộ hóa vào Engine:** Tự động copy vào thư mục `characters/phoebe_chibi/` và cập nhật thông số `pupil_anchor` vào `manifest.json`.
+
 ---
 
-## 5. Chiến Lược Kiểm Thử (Testing & Quality Assurance - Quy Tắc AGENTS.md)
+## 6. Chiến Lược Kiểm Thử (Testing & Quality Assurance - Quy Tắc AGENTS.md)
 
 1. **Rust Unit Tests (`cargo test`):**
    * `test_angle_and_distance_calculation`: Kiểm tra tính toán góc lượng giác và khoảng cách chuột.
@@ -213,3 +258,4 @@ Thư mục nhân vật mặc định: `characters/phoebe_chibi/manifest.json`:
 3. **Tiêu chuẩn nghiệm thu hiệu năng:**
    * Đo đạc mức chiếm dụng tài nguyên hệ thống qua Task Manager: **RAM < 40MB, CPU < 0.5% khi Idle**.
    * Đảm bảo không rò rỉ bộ nhớ (Memory Leak) sau 1 giờ chạy liên tục.
+
