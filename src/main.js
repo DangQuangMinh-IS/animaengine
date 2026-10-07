@@ -16,10 +16,10 @@ const speechBubble = document.getElementById('speech-bubble');
 const speechText = document.getElementById('speech-text');
 const voicePlayer = document.getElementById('voice-player');
 const contextMenu = document.getElementById('context-menu');
-const menuPoke = document.getElementById('menu-poke');
 const menuMute = document.getElementById('menu-mute');
 const menuExit = document.getElementById('menu-exit');
 const charOptionElements = document.querySelectorAll('.char-option');
+const actionButtons = document.querySelectorAll('.action-btn');
 
 // Danh sách các nhân vật được hỗ trợ
 const CHARACTER_CATALOG = {
@@ -53,6 +53,7 @@ let isMuted = false;
 let typingTimeout = null;
 let panicTimeout = null;
 let speechTimeout = null;
+let ambientInterval = null;
 let renderer3d = null;
 
 // Lấy thông tin cửa sổ hiện tại (nếu chạy dưới Tauri)
@@ -83,9 +84,9 @@ async function loadCharacter(charId) {
   try {
     const res = await fetch(charConfig.path);
     currentManifest = await res.json();
-    console.log(`[Anima Engine] Đã nạp manifest cho nhân vật "${charId}":`, currentManifest);
+    logToBackend(`[Character] Loaded manifest for "${charId}": ${currentManifest.name}`);
   } catch (err) {
-    console.error(`[Anima Engine] Lỗi nạp manifest cho "${charId}":`, err);
+    logToBackend(`[Character ERROR] Failed to load manifest for "${charId}": ${err}`);
     return;
   }
 
@@ -182,6 +183,45 @@ function setState(newState, forceUpdate = false, forceDialogue = null, forceSoun
 }
 
 /**
+ * Thực thi một hành động tương tác tức thời (Salute, Praise, Focus, Teatime, Poke, Shake)
+ */
+function triggerAction(actionName, customDialogue = null, customSound = null) {
+  if (!currentManifest) return;
+
+  const stateData = currentManifest.states?.[actionName];
+  if (!stateData) {
+    console.warn(`[Action] Hành động "${actionName}" không có trong manifest`);
+    return;
+  }
+
+  // 1. Âm thanh
+  const sound = customSound || stateData.sound;
+  if (sound) {
+    const soundUrl = sound.startsWith('/') ? sound : `/characters/${currentCharacterId}/${sound}`;
+    playVoice(soundUrl);
+  }
+
+  // 2. Lời thoại
+  const dialogues = stateData.dialogues || [];
+  const text = customDialogue || (dialogues.length > 0 ? dialogues[Math.floor(Math.random() * dialogues.length)] : null);
+  if (text) {
+    showSpeech(text, 4000);
+  }
+
+  // 3. Hoạt ảnh tương ứng
+  if (currentManifest.type === '3d' && renderer3d && stateData.clip) {
+    renderer3d.playOneShot(stateData.clip, 'Cafe_Idle', 3800);
+  } else if (currentManifest.type === '2d' && stateData.asset) {
+    chibiImg.src = `/characters/${currentCharacterId}/${stateData.asset}`;
+    setTimeout(() => {
+      if (currentState === 'idle') {
+        applyStateToRenderer('idle');
+      }
+    }, 3500);
+  }
+}
+
+/**
  * Hiển thị bong bóng thoại
  */
 function showSpeech(text, duration = 3500) {
@@ -211,46 +251,14 @@ function playVoice(soundPath) {
 }
 
 /**
- * Tương tác xoa đầu / Chọc nhân vật (Poke)
- */
-function pokeCharacter() {
-  if (currentManifest?.states?.poke) {
-    const pokeState = currentManifest.states.poke;
-    const sound = pokeState.sound;
-    const dialogues = pokeState.dialogues || [];
-    const text = dialogues[Math.floor(Math.random() * dialogues.length)];
-
-    if (currentManifest.type === '3d' && renderer3d && pokeState.clip) {
-      renderer3d.playAnimation(pokeState.clip, false, 0.15);
-      setTimeout(() => {
-        if (currentState === 'idle') {
-          applyStateToRenderer('idle');
-        }
-      }, 2000);
-    }
-
-    if (text) showSpeech(text);
-    if (sound) {
-      const soundUrl = sound.startsWith('/') ? sound : `/characters/${currentCharacterId}/${sound}`;
-      playVoice(soundUrl);
-    }
-  } else {
-    // Mặc định fallback thoại tương tác
-    const defaultDialogues = [
-      'Sensei... xoa đầu tôi sao? Thật là...',
-      'Được Sensei chăm sóc thế này... dễ chịu thật đấy.',
-      'Hôm nay Sensei cũng vất vả rồi nhé! 💕'
-    ];
-    const text = defaultDialogues[Math.floor(Math.random() * defaultDialogues.length)];
-    showSpeech(text);
-  }
-}
-
-/**
- * Thiết lập sự kiện kéo thả chuột và tương tác UI
+ * Thiết lập sự kiện kéo thả chuột, lắc chuột và tương tác UI
  */
 function setupMouseInteractions() {
   let dragStartTime = 0;
+  let lastMouseX = 0;
+  let lastMouseY = 0;
+  let lastShakeTime = 0;
+  let shakeCounter = 0;
 
   const finishDrag = () => {
     if (isDragging || currentState === 'dragged') {
@@ -269,6 +277,9 @@ function setupMouseInteractions() {
       contextMenu.classList.add('hidden');
       isDragging = true;
       dragStartTime = Date.now();
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+      shakeCounter = 0;
       setState('dragged');
 
       try {
@@ -289,8 +300,14 @@ function setupMouseInteractions() {
   chibiWrapper.addEventListener('click', () => {
     const elapsed = Date.now() - dragStartTime;
     if (elapsed < 250) {
-      pokeCharacter();
+      triggerAction('poke');
     }
+  });
+
+  // Double Click vào chibi -> Khen thưởng / Cưng chiều (Praise)
+  chibiWrapper.addEventListener('dblclick', (e) => {
+    e.preventDefault();
+    triggerAction('praise');
   });
 
   // Chuột phải -> Mở menu ngữ cảnh
@@ -306,10 +323,12 @@ function setupMouseInteractions() {
     }
   });
 
-  // Tương tác Poke từ menu
-  menuPoke.addEventListener('click', () => {
-    contextMenu.classList.add('hidden');
-    pokeCharacter();
+  // Các nút hành động tương tác nhanh trong menu
+  actionButtons.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      contextMenu.classList.add('hidden');
+      triggerAction(btn.dataset.action);
+    });
   });
 
   // Bật/Tắt âm thanh
@@ -342,8 +361,33 @@ function setupMouseInteractions() {
     }
   });
 
-  // Xử lý xoay nhìn theo chuột (Local Mouse Fallback)
+  // Xử lý xoay nhìn theo chuột & Nhận diện lắc chuột (Shake Detection)
   window.addEventListener('mousemove', (e) => {
+    // Nhận diện rung lắc mạnh khi đang kéo thả
+    if (isDragging) {
+      const dx = e.clientX - lastMouseX;
+      const dy = e.clientY - lastMouseY;
+      const speed = Math.sqrt(dx * dx + dy * dy);
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+
+      if (speed > 45) {
+        shakeCounter++;
+        if (shakeCounter >= 4 && Date.now() - lastShakeTime > 4500) {
+          lastShakeTime = Date.now();
+          shakeCounter = 0;
+          triggerAction('shake');
+        }
+      } else {
+        shakeCounter = Math.max(0, shakeCounter - 0.4);
+      }
+    } else {
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+      shakeCounter = 0;
+    }
+
+    // Look-at chuột cục bộ (khi chuột trong cửa sổ)
     if (currentManifest?.type === '3d' && renderer3d && !isDragging) {
       const rect = chibiWrapper.getBoundingClientRect();
       const centerX = rect.left + rect.width / 2;
@@ -355,6 +399,22 @@ function setupMouseInteractions() {
       renderer3d.updateMouseLook(angle, distance);
     }
   });
+}
+
+/**
+ * Hành vi ngẫu nhiên khi nhàn rỗi (Ambient Idle Fidget)
+ */
+function startAmbientTimer() {
+  if (ambientInterval) clearInterval(ambientInterval);
+
+  ambientInterval = setInterval(() => {
+    // Chỉ kích hoạt khi đang Idle, không kéo thả và context menu đóng
+    if (currentState === 'idle' && !isDragging && contextMenu.classList.contains('hidden')) {
+      const ambientChoices = ['focus', 'teatime', 'salute'];
+      const action = ambientChoices[Math.floor(Math.random() * ambientChoices.length)];
+      triggerAction(action);
+    }
+  }, 26000); // 26 giây một lần
 }
 
 /**
@@ -442,6 +502,7 @@ async function init() {
   await loadCharacter(currentCharacterId);
   setupMouseInteractions();
   await setupTauriListeners();
+  startAmbientTimer();
   logToBackend(`[Init] Anima Engine started successfully with character: ${currentCharacterId}`);
 
   setTimeout(() => {

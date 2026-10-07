@@ -39,6 +39,55 @@
         "Oa... Sensei, buông tôi xuống đi mà!",
         "Tư thế này... xấu hổ chết đi được..."
       ]
+    },
+    "poke": {
+      "asset": "animations/idle.png",
+      "sound": "audio/Hina_Cafe_Act_2.ogg.mp3",
+      "dialogues": [
+        "Sensei... xoa đầu tôi sao? Thật là...",
+        "Được Sensei chăm sóc thế này... dễ chịu thật đấy.",
+        "Sensei đừng chọc tôi mãi chứ, tôi còn phải làm việc..."
+      ]
+    },
+    "salute": {
+      "asset": "animations/idle.png",
+      "sound": "audio/Hina_LogIn_1.ogg.mp3",
+      "dialogues": [
+        "Trưởng ban Kỷ luật Gehenna, Sorasaki Hina có mặt! Chào Sensei!",
+        "Hôm nay tôi sẽ bảo đảm an ninh tuyệt đối cho bàn làm việc của Sensei."
+      ]
+    },
+    "praise": {
+      "asset": "animations/typing.png",
+      "sound": "audio/Hina_MemorialLobby_1_1.ogg.mp3",
+      "dialogues": [
+        "Sensei khen ngợi tôi sao?... Tôi vui lắm.",
+        "Chỉ cần có Sensei công nhận, mọi mệt mỏi đều tan biến hết."
+      ]
+    },
+    "focus": {
+      "asset": "animations/idle.png",
+      "sound": "audio/Hina_Lobby_1.ogg.mp3",
+      "dialogues": [
+        "Sensei muốn tập trung làm việc ư? Tôi sẽ yên lặng túc trực bên cạnh người.",
+        "Cố lên nhé Sensei, tôi luôn ở ngay đây cùng người."
+      ]
+    },
+    "teatime": {
+      "asset": "animations/idle.png",
+      "sound": "audio/Hina_Lobby_5.ogg.mp3",
+      "dialogues": [
+        "Sensei đã làm việc vất vả rồi. Hãy uống một tách trà ấm nghỉ ngơi đi nào.",
+        "Nghỉ một chút rồi hẵng tiếp tục nhé Sensei."
+      ]
+    },
+    "shake": {
+      "asset": "animations/panic.png",
+      "sound": "audio/Hina_Cafe_Act_3.ogg.mp3",
+      "dialogues": [
+        "Oa oa! Sensei lắc mạnh tay quá, tôi chóng mặt quá...",
+        "Dừng lại chút đi Sensei ơi, trời đất đảo lộn rồi!"
+      ]
     }
   }
 }

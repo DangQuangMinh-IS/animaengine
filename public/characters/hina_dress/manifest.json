@@ -54,6 +54,46 @@
         "Được Sensei chăm sóc thế này... dễ chịu thật đấy.",
         "Hôm nay Sensei cũng vất vả rồi nhé! 💕"
       ]
+    },
+    "salute": {
+      "clip": "Normal_Callsign",
+      "sound": "/characters/hina/audio/Hina_LogIn_1.ogg.mp3",
+      "dialogues": [
+        "Sorasaki Hina sẵn sàng nhận mệnh lệnh từ Sensei!",
+        "Chào Sensei, tôi sẽ luôn đồng hành bảo vệ người."
+      ]
+    },
+    "praise": {
+      "clip": "Victory_End",
+      "sound": "/characters/hina/audio/Hina_MemorialLobby_1_1.ogg.mp3",
+      "dialogues": [
+        "Fufu~ Sensei khen tôi sao? Cảm ơn Sensei nhiều lắm.",
+        "Tôi sẽ cố gắng hơn nữa để xứng đáng với sự tin tưởng của người!"
+      ]
+    },
+    "focus": {
+      "clip": "Formation_Idle_Random",
+      "sound": "/characters/hina/audio/Hina_Lobby_1.ogg.mp3",
+      "dialogues": [
+        "Sensei cứ yên tâm làm việc, tôi sẽ quan sát và hỗ trợ người.",
+        "Tập trung làm việc thật tốt nhé Sensei, tôi không làm phiền đâu."
+      ]
+    },
+    "teatime": {
+      "clip": "Exs_Cutin",
+      "sound": "/characters/hina/audio/Hina_Lobby_5.ogg.mp3",
+      "dialogues": [
+        "Sensei, chúng ta cùng thưởng thức một tách hồng trà ấm nhé?",
+        "Tạm gác công việc lại một chút thôi Sensei, sức khỏe là trên hết."
+      ]
+    },
+    "shake": {
+      "clip": "Vital_Panic",
+      "sound": "/characters/hina/audio/Hina_Cafe_Act_3.ogg.mp3",
+      "dialogues": [
+        "Oa oa! Sensei lắc mạnh quá, váy của tôi rối tung lên rồi!",
+        "Sensei dừng lại chút đi, tôi hoa cả mắt rồi..."
+      ]
     }
   }
 }

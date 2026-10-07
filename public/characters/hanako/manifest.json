@@ -49,6 +49,41 @@
         "Nhột quá Sensei ơi~",
         "Sensei thích chạm vào em như vậy sao? Fufu~"
       ]
+    },
+    "salute": {
+      "clip": "Tactical_Start",
+      "dialogues": [
+        "Chào Sensei yêu quý! Hanako xin phép được phục vụ người hôm nay~",
+        "Fufu, Sensei cần em tuân theo mệnh lệnh gì nào?"
+      ]
+    },
+    "praise": {
+      "clip": "Exs_Cutin",
+      "dialogues": [
+        "Fufu~ Được Sensei khen làm tim em đập nhanh quá này~",
+        "Sensei tuyệt vời nhất! Hanako yêu Sensei nhiều lắm~ 💕"
+      ]
+    },
+    "focus": {
+      "clip": "Formation_Idle",
+      "dialogues": [
+        "Em sẽ đứng đây ngoan ngoãn ngắm Sensei làm việc nhé.",
+        "Sensei tập trung đi nào, em hứa sẽ không quậy phá đâu~ Fufu."
+      ]
+    },
+    "teatime": {
+      "clip": "Tactical_Start",
+      "dialogues": [
+        "Giờ giải lao rồi Sensei ơi~ Chúng mình cùng nghỉ ngơi tâm sự chút đi!",
+        "Làm việc nhiều mệt rồi, để Hanako chăm sóc cho Sensei nhé~"
+      ]
+    },
+    "shake": {
+      "clip": "Formation_Pickup",
+      "dialogues": [
+        "Oa oa~ Sensei lắc mạnh thế này đồ đạc của em rơi hết bây giờ!",
+        "Chóng mặt quá Sensei ơi... nhưng mà cũng vui ghê~"
+      ]
     }
   }
 }

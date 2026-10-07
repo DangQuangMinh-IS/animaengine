@@ -1,16 +1,29 @@
 """
 tests/test_character_packs.py
 Kiểm thử tính toàn vẹn của hệ thống nhân vật Hybrid (2D Sprite & 3D GLB Models)
+Bao gồm các tương tác nâng cao: salute, praise, focus, teatime, poke, shake
 """
 
 import unittest
 import json
-import os
 import struct
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).resolve().parent.parent
 CHARACTERS_DIR = ROOT_DIR / "public" / "characters"
+
+REQUIRED_INTERACTION_STATES = [
+    "idle",
+    "typing",
+    "panic_shutdown",
+    "dragged",
+    "poke",
+    "salute",
+    "praise",
+    "focus",
+    "teatime",
+    "shake",
+]
 
 
 def extract_glb_animation_names(glb_path: Path) -> list[str]:
@@ -42,7 +55,7 @@ class TestCharacterPacks(unittest.TestCase):
         self.assertEqual(manifest.get("type"), "2d")
 
         states = manifest.get("states", {})
-        for state_name in ["idle", "typing", "panic_shutdown", "dragged"]:
+        for state_name in REQUIRED_INTERACTION_STATES:
             self.assertIn(state_name, states, f"Thiếu state '{state_name}' trong Hina 2D")
             asset_rel = states[state_name].get("asset")
             self.assertTrue(asset_rel, f"Thiếu asset cho state '{state_name}'")
@@ -68,13 +81,13 @@ class TestCharacterPacks(unittest.TestCase):
         self.assertGreater(len(available_clips), 0, "Mô hình phải chứa ít nhất 1 animation clip")
 
         states = manifest.get("states", {})
-        for state_name in ["idle", "typing", "panic_shutdown", "dragged", "poke"]:
-            self.assertIn(state_name, states, f"Thiếu state '{state_name}'")
+        for state_name in REQUIRED_INTERACTION_STATES:
+            self.assertIn(state_name, states, f"Thiếu state '{state_name}' trong Hina Dress 3D")
             clip_name = states[state_name].get("clip")
             self.assertIn(
                 clip_name,
                 available_clips,
-                f"Clip '{clip_name}' trong state '{state_name}' không tồn tại trong model.glb",
+                f"Clip '{clip_name}' trong state '{state_name}' không tồn tại trong Hina Dress model.glb",
             )
 
     def test_3d_character_hanako(self):
@@ -93,10 +106,14 @@ class TestCharacterPacks(unittest.TestCase):
 
         available_clips = extract_glb_animation_names(model_file)
         states = manifest.get("states", {})
-        for state_name in ["idle", "typing", "panic_shutdown", "dragged", "poke"]:
-            self.assertIn(state_name, states)
+        for state_name in REQUIRED_INTERACTION_STATES:
+            self.assertIn(state_name, states, f"Thiếu state '{state_name}' trong Hanako 3D")
             clip_name = states[state_name].get("clip")
-            self.assertIn(clip_name, available_clips)
+            self.assertIn(
+                clip_name,
+                available_clips,
+                f"Clip '{clip_name}' trong state '{state_name}' không tồn tại trong Hanako model.glb",
+            )
 
     def test_3d_character_airi(self):
         char_dir = CHARACTERS_DIR / "airi"
@@ -114,10 +131,14 @@ class TestCharacterPacks(unittest.TestCase):
 
         available_clips = extract_glb_animation_names(model_file)
         states = manifest.get("states", {})
-        for state_name in ["idle", "typing", "panic_shutdown", "dragged", "poke"]:
-            self.assertIn(state_name, states)
+        for state_name in REQUIRED_INTERACTION_STATES:
+            self.assertIn(state_name, states, f"Thiếu state '{state_name}' trong Airi 3D")
             clip_name = states[state_name].get("clip")
-            self.assertIn(clip_name, available_clips)
+            self.assertIn(
+                clip_name,
+                available_clips,
+                f"Clip '{clip_name}' trong state '{state_name}' không tồn tại trong Airi model.glb",
+            )
 
 
 if __name__ == "__main__":

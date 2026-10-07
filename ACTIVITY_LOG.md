@@ -83,16 +83,40 @@ Tài liệu này lưu trữ lịch sử các sự kiện, phiên làm việc, l�
   - Thêm script lệnh chuẩn hóa vào `package.json`: `"build:app": "tauri build --no-bundle"`.
   - Thực hiện đóng gói hoàn chỉnh bằng `npm run build:app`.
   - Toàn bộ HTML/CSS, Three.js runtime và các mô hình `.glb` (Hina Dress, Hanako, Airi) được nhúng trực tiếp vào tệp thực thi `app.exe`.
-  - Kết nối logger `log_front` / `logToBackend` ghi nhận: `[Init] Anima Engine started successfully with character: hina`.
+#### Sự kiện 10: Mở rộng bộ tương tác đa dạng dựa trên các clip hoạt ảnh gốc của từng Model
+- **Hành động sáng tạo tương tác:**
+  1. **Chào Sensei (`salute`):**
+     - Hina: Clip `Normal_Callsign` (quân lễ Trưởng ban Kỷ luật Gehenna).
+     - Airi: Clip `Normal_Callsign` (chào quân lễ Chibi After-School Sweets Club).
+     - Hanako: Clip `Tactical_Start` (vẫy tay cúi chào phong cách Trinity).
+  2. **Khen thưởng / Cưng chiều (`praise`):**
+     - Kích hoạt qua Menu hoặc **Double-Click** vào nhân vật.
+     - Hina: Clip `Victory_End` (mỉm cười tự hào).
+     - Airi: Clip `Victory_Start` (vui mừng hò reo).
+     - Hanako: Clip `Exs_Cutin` (dáng điệu nháy mắt tạo dáng fufu).
+  3. **Chế độ cùng tập trung làm việc / Học tập (`focus`):**
+     - Airi: Clip `NonWeapon_Study` (ngồi đọc sách chăm chỉ bên cạnh Sensei).
+     - Hina: Clip `Formation_Idle_Random` (đứng trang nghiêm túc trực bảo vệ Sensei).
+     - Hanako: Clip `Formation_Idle` (ngoan ngoãn đồng hành không quấy rầy).
+  4. **Giờ giải lao / Trà chiều (`teatime`):**
+     - Airi: Clip `NonWeapon_DessertTable` (ngồi ăn kem bạc hà sô cô la mát lạnh).
+     - Hina: Clip `Exs_Cutin` (thưởng thức trà ấm thư giãn).
+     - Hanako: Clip `Tactical_Start` (mời Sensei nghỉ ngơi tâm sự).
+  5. **Nhận diện rung lắc chuột khi đang kéo (`shake`):**
+     - Khi giữ chuột kéo mascot và vung chuột qua lại nhanh (> 45px/tick), nhân vật kích hoạt phản ứng chóng mặt (`Vital_Panic`) và kêu xin dừng lại.
+  6. **Cử chỉ ngẫu nhiên khi nhàn rỗi (Ambient Idle Fidget):**
+     - Cứ sau 26 giây nhàn rỗi, mascot tự động kích hoạt ngẫu nhiên các động tác đáng yêu (uống trà, đọc sách, chào hỏi) để desktop luôn sinh động.
+- **Cập nhật kiểm thử:** Bổ sung kiểm tra đầy đủ 10 trạng thái tương tác trong [tests/test_character_packs.py](file:///F:/project/animaengine/tests/test_character_packs.py).
 
 ---
 
 ### 3. Kết quả nghiệm thu & Kiểm thử tự động
 - **Tổng số Unit Tests:** **14/14 tests đạt 100% PASS**
-  - Python (`tests/test_process_assets.py` & `tests/test_character_packs.py`): 10/10 tests (kiểm tra toàn bộ thuật toán tách nền, bảo toàn màu da, tính hợp lệ của manifest 2D/3D và sự tồn tại của animation clip trong các file .glb).
-  - Rust (`src-tauri/src/sensors.rs`): 4/4 tests (tính toán góc/khoảng cách, vùng nguy hiểm nút shutdown, bộ đếm nhịp gõ phím burst, vòng đời theo dõi kéo thả `DragTracker`).
+  - Python (`tests/test_process_assets.py` & `tests/test_character_packs.py`): 10/10 tests (xác thực toàn bộ 10 tương tác mới tồn tại hợp lệ trong file binary .glb của từng nhân vật).
+  - Rust (`src-tauri/src/sensors.rs`): 4/4 tests.
 - **Hiệu năng thực tế:**
-  - Mức tiêu thụ RAM: **~39 - 42 MB** (đáp ứng mục tiêu < 50MB).
-  - Mức tiêu thụ CPU: **~0.0% - 0.2% khi idle**, phản hồi tức thì khi tương tác.
-- **Trạng thái ứng dụng:** Hoạt động ổn định trên màn hình chính của người dùng, sẵn sàng chuyển đổi giữa 2D và 3D qua menu chuột phải.
+  - Mức tiêu thụ RAM: **~43 MB** (đáp ứng mục tiêu < 50MB).
+  - Mức tiêu thụ CPU: **~0.0% - 0.2% khi idle**, hoạt ảnh 60fps mượt mà.
+- **Trạng thái ứng dụng:** Đã cập nhật thành công và đang chạy ổn định.
+
 

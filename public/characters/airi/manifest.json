@@ -49,6 +49,41 @@
         "A! Sensei làm em suýt làm rơi thìa kem bây giờ!",
         "Sensei xoa đầu em ạ? Hì hì, thích quá đi!"
       ]
+    },
+    "salute": {
+      "clip": "Normal_Callsign",
+      "dialogues": [
+        "Thành viên ban nhạc After-School Sweets Club, Kurimura Airi báo cáo! Chào Sensei!",
+        "Sẵn sàng cháy hết mình cùng Sensei hôm nay!"
+      ]
+    },
+    "praise": {
+      "clip": "Victory_Start",
+      "dialogues": [
+        "Sensei khen em ạ?! Woa, em vui quá đi mất!",
+        "Được Sensei động viên thế này, em sẽ luyện tập chăm chỉ hơn nữa!"
+      ]
+    },
+    "focus": {
+      "clip": "NonWeapon_Study",
+      "dialogues": [
+        "Sensei học bài / làm việc ạ? Em cũng sẽ ngồi đọc sách cùng người thật chăm chỉ!",
+        "Suỵt... hai chúng ta cùng im lặng tập trung hoàn thành công việc nhé!"
+      ]
+    },
+    "teatime": {
+      "clip": "NonWeapon_DessertTable",
+      "dialogues": [
+        "Tadaa! Đến giờ ăn tráng miệng rồi Sensei ơi! Kem bạc hà sô cô la mát lạnh đây!",
+        "Nạp chút đường ngọt ngào là não bộ hoạt động tốt hơn ngay đó Sensei!"
+      ]
+    },
+    "shake": {
+      "clip": "Vital_Panic",
+      "dialogues": [
+        "Oa oa oa! Sensei lắc em làm cốc kem rung chuyển dữ dội quá!",
+        "Chóng mặt quá đi Sensei ơi, cây đàn rơi mất bây giờ!"
+      ]
     }
   }
 }

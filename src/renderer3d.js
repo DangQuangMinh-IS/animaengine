@@ -159,6 +159,25 @@ export class ThreeMascotRenderer {
   }
 
   /**
+   * Phát hoạt ảnh một lần (One-shot) rồi tự động quay lại clip trước đó hoặc idle
+   */
+  playOneShot(clipName, returnClip = 'Cafe_Idle', duration = 3500, fadeDuration = 0.25) {
+    if (!this.mixer || !clipName) return;
+
+    if (this.oneShotTimeout) {
+      clearTimeout(this.oneShotTimeout);
+      this.oneShotTimeout = null;
+    }
+
+    this.playAnimation(clipName, false, fadeDuration);
+
+    this.oneShotTimeout = setTimeout(() => {
+      this.playAnimation(returnClip, true, fadeDuration);
+      this.oneShotTimeout = null;
+    }, duration);
+  }
+
+  /**
    * Phản xạ hướng đầu / cơ thể nhìn theo tọa độ con trỏ chuột
    * angle: radian (-PI đến PI), distance: khoảng cách px
    */
