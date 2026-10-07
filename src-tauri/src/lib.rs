@@ -5,7 +5,7 @@ pub mod sensors;
 
 use std::thread;
 use std::time::{Duration, Instant};
-use tauri::{AppHandle, Emitter};
+use tauri::{AppHandle, Emitter, Manager};
 
 use sensors::{is_in_shutdown_zone, TypingCounter};
 
@@ -30,6 +30,12 @@ pub fn run() {
                         .level(log::LevelFilter::Info)
                         .build(),
                 )?;
+            }
+
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.center();
+                let _ = window.show();
+                let _ = window.set_focus();
             }
 
             let app_handle = app.handle().clone();
