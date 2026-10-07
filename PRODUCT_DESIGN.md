@@ -83,24 +83,24 @@ Mỗi nhân vật được đóng gói dưới dạng một thư mục riêng bi
 
 ```text
 characters/
-└── phoebe_chibi/           <-- Nhân vật mặc định: Phoebe (Wuthering Waves)
+└── hina/                   <-- Nhân vật mặc định: Sorasaki Hina (Blue Archive)
     ├── manifest.json       <-- Khai báo thông tin, scale, mapping hoạt ảnh và âm thanh
     ├── preview.png         <-- Ảnh đại diện
-    ├── audio/              <-- Hiệu ứng âm thanh (.mp3 / .wav)
-    │   ├── poke.mp3
-    │   └── panic.mp3
-    └── animations/         <-- Hoạt ảnh trong suốt (WebM Alpha / PNG Sequences / Layers)
-        ├── idle.webm
-        ├── typing.webm
-        ├── panic.webm
-        ├── drag.webm
-        └── eyes/           <-- Dùng cho tính năng mắt nhìn theo chuột
-            ├── base.png    <-- Khung mặt
-            └── pupil.png   <-- Tròng mắt linh hoạt
+    ├── audio/              <-- 40 file âm thanh lồng tiếng gốc từ F:\hina voice
+    │   ├── Hina_Cafe_Act_1.ogg.mp3
+    │   ├── Hina_Cafe_Act_2.ogg.mp3
+    │   ├── Hina_Cafe_Act_3.ogg.mp3
+    │   ├── Hina_Cafe_Act_4.ogg.mp3
+    │   └── Hina_Cafe_Act_5.ogg.mp3
+    └── animations/         <-- Hoạt ảnh trong suốt (Giai đoạn 1: 4 Sprite PNG / Giai đoạn 2: Spine 2D)
+        ├── idle.png        <-- Đứng yên chắp tay sau lưng, mỉm cười nhẹ
+        ├── typing.png      <-- Vỗ tay / cổ vũ hào hứng
+        ├── panic.png       <-- Toát mồ hôi, mắt hoa tiêu hoảng sợ
+        └── dragged.png     <-- Tư thế Cafe Picked-up bị nhấc bổng lơ lửng bằng chuột
 ```
 
-* **Bản MVP:** Đi kèm **Phoebe (Wuthering Waves)** làm mascot chuẩn mực (Benchmark Mascot) với tạo hình nữ tu Spectro dễ thương, đầy đủ asset cho 5 trạng thái hành vi cốt lõi.
-* **Bản cập nhật tiếp theo:** Cơ chế tự động quét thư mục `characters/` để tải thêm nhân vật mà không cần nạp lại phần mềm.
+* **Bản MVP (Giai đoạn 1):** Đi kèm **Sorasaki Hina (Blue Archive)** làm mascot chuẩn mực (Benchmark Mascot) với 4 sprite SD Cafe chính thức chuẩn 100% tư thế (đặc biệt là tư thế bị nhấc bổng `Cafe_Pick` kinh điển), tích hợp trọn bộ lồng tiếng Cafe có sẵn từ máy người dùng.
+* **Bản nâng cấp (Giai đoạn 2):** Nạp trực tiếp bộ xương Spine 2D WebGL (`.skel`/`.json` + `.atlas`) của Hina để chuyển động 60 FPS toàn diện.
 
 ---
 

@@ -156,93 +156,103 @@ Các trạng thái của Phoebe và thứ tự ưu tiên:
 
 ---
 
-## 4. Đặc Tả Dữ Liệu Nhân Vật (Phoebe Manifest Schema)
+## 4. Đặc Tả Dữ Liệu Nhân Vật (Hina Manifest Schema)
 
-Thư mục nhân vật mặc định: `characters/phoebe_chibi/manifest.json`:
+Thư mục nhân vật mặc định: `characters/hina/manifest.json`:
 
 ```json
 {
-  "id": "phoebe_chibi",
-  "name": "Phoebe (Wuthering Waves)",
+  "id": "hina",
+  "name": "Sorasaki Hina (Blue Archive)",
   "version": "1.0.0",
   "author": "AnimaEngine",
   "scale": 1.0,
   
   "states": {
     "idle": {
-      "asset": "animations/idle.webm",
-      "loop": true
+      "asset": "animations/idle.png",
+      "loop": true,
+      "dialogues": [
+        "Sensei, có việc gì cần tôi giúp không?",
+        "Công việc giấy tờ hôm nay vẫn còn nhiều lắm...",
+        "Ở bên cạnh Sensei thế này... thật yên bình."
+      ]
     },
     "typing": {
-      "asset": "animations/typing.webm",
+      "asset": "animations/typing.png",
       "loop": true,
-      "dialogues": ["Cố lên chủ nhân! (★ω★)", "Gõ phím siêu quá đi!"]
+      "sound": "audio/Hina_Cafe_Act_4.ogg.mp3",
+      "dialogues": [
+        "Sensei gõ nhanh thật đấy! Cố lên nhé!",
+        "Tuyệt vời lắm, sắp xong rồi!"
+      ]
     },
     "panic_shutdown": {
-      "asset": "animations/panic.webm",
-      "sound": "audio/panic.mp3",
-      "dialogues": ["Đừng tắt máy mà hu hu! (っ- ‸ - ς)", "Cho em chơi thêm xíu đi!"]
+      "asset": "animations/panic.png",
+      "sound": "audio/Hina_Cafe_Act_5.ogg.mp3",
+      "dialogues": [
+        "Sensei định tắt máy sao? Đừng mà...",
+        "Còn bao nhiêu công việc của Gehenna chưa xong mà Sensei!"
+      ]
     },
     "dragged": {
-      "asset": "animations/drag.webm",
-      "sound": "audio/wobble.mp3"
+      "asset": "animations/dragged.png",
+      "sound": "audio/Hina_Cafe_Act_1.ogg.mp3",
+      "dialogues": [
+        "Oa... Sensei, buông tôi xuống đi mà!",
+        "Tư thế này... xấu hổ chết đi được..."
+      ]
     }
   },
 
   "eye_tracking": {
-    "enabled": true,
-    "base_sprite": "animations/eyes/base.png",
-    "pupil_sprite": "animations/eyes/pupil.png",
-    "pupil_anchor": { "x": 150, "y": 120 },
-    "max_radius": 10
+    "enabled": false
   }
 }
 ```
 
-## 5. Quy Trình Sản Xuất & Xử Lý Asset Từ LoRA (`phoebe_chibi_anima_v1.safetensors`)
+## 5. Chiến Lược Tích Hợp Asset Hina & Lộ Trình Nâng Cấp Spine 2D
 
-Quy trình chuẩn để chuyển đổi từ mô hình AI sang asset game siêu nhẹ:
+Phương án sử dụng nhân vật **Hina (Blue Archive)** giúp giảm thiểu rủi ro, kiểm soát chất lượng tuyệt đối và tận dụng toàn bộ tài nguyên sẵn có:
 
 ```mermaid
 flowchart TD
-    LoRA["phoebe_chibi_anima_v1.safetensors<br>(Dim: 64, Alpha: 64, Res: 1024x1024)"] --> WebUI["WebUI / ComfyUI / Diffusers<br>(Base: anima-base-v1.0)"]
-    WebUI --> RawImages["4 Ảnh Render Thô (Nền Trắng)<br>(idle, typing, panic, dragged)"]
-    RawImages --> PyScript["Script Tự Động: tools/process_assets.py<br>(Tách nền Alpha trong suốt + Cắt lớp tròng mắt)"]
-    PyScript --> FinalPack["Gói Asset Chuẩn: characters/phoebe_chibi/<br>(base.png, pupil.png, typing.png, panic.png, drag.png)"]
+    subgraph Phase1 ["Giai đoạn 1: MVP Cốt Lõi (Ngay bây giờ)"]
+        AudioPack["40 File Audio Gốc<br>(F:\hina voice)"]
+        SDSprites["4 Sprite SD Cafe PNG Trong Suốt<br>(Idle, Typing, Panic, Dragged)"]
+        TauriCore["Khung Tauri + Rust<br>(Cửa sổ trong suốt, Always-on-top, Hooks)"]
+        AudioPack & SDSprites --> TauriCore
+    end
+
+    subgraph Phase2 ["Giai đoạn 2: Nâng Cấp Hoạt Ảnh Khung Xương (Roadmap)"]
+        SpineRuntime["Thư viện Spine WebGL<br>(pixi-spine / spine-player)"]
+        SpineModel["Bộ Xương Spine 2D Của Hina<br>(.skel/.json + .atlas + .png)"]
+        SpineRuntime & SpineModel --> WebviewRenderer["Mascot Chuyển Động 60 FPS Mượt Mà"]
+    end
+
+    Phase1 --> Phase2
 ```
 
-### 5.1. Thông số Cấu hình Render từ LoRA
-* **Base Model:** `anima-base-v1.0.safetensors` (hoặc checkpoint Anime tương thích).
-* **Độ phân giải:** $1024 \times 1024$ (tỉ lệ 1:1 chuẩn chibi).
-* **LoRA Weight:** `0.8 - 1.0` (Trigger chính: `phoebe_chibi`).
-* **Sampler:** DPM++ 2M Karras hoặc Euler a, Steps: 24–30, CFG Scale: 6.0–7.0.
+### 5.1. Khai Thác 40 File Âm Thanh Gốc Có Sẵn (`F:\hina voice`)
+* Dự án tận dụng trực tiếp kho 40 file âm thanh lồng tiếng chính thức của Hina đã có sẵn trên máy:
+  * `Hina_Cafe_Act_1.ogg.mp3` ➔ Kích hoạt khi bị nhấc chuột (`Dragged`).
+  * `Hina_Cafe_Act_2.ogg.mp3` & `Act_3` ➔ Lời thoại tương tác ngẫu nhiên khi click vào Hina.
+  * `Hina_Cafe_Act_4.ogg.mp3` ➔ Lời thoại cổ vũ khi gõ phím nhanh (`Typing`).
+  * `Hina_Cafe_Act_5.ogg.mp3` ➔ Lời thoại hốt hoảng khi chuột vào góc Shutdown (`Panic`).
 
-### 5.2. Bộ Prompt Chuẩn Cho 4 Trạng Thái Cốt Lõi
+### 5.2. Giai Đoạn 1 (MVP Ngay Bây Giờ): 4 Sprite SD Cafe PNG
+* Sử dụng 4 hình ảnh Sprite SD Cafe chính thức chuẩn nét vẽ gốc của Nexon Games:
+  1. `idle.png`: Hina đứng chắp tay sau lưng, mỉm cười nhẹ.
+  2. `typing.png`: Hina giơ tay cổ vũ, mắt sáng lấp lánh (Cheering/Happy).
+  3. `panic.png`: Hina toát mồ hôi, mắt hoa tiêu bối rối (Defeated/Stunned).
+  4. `dragged.png`: Hina bị nhấc bổng lơ lửng bằng chuột (`Cafe_Pick` / `Hold`) với hai chân đung đưa.
+* **Mục tiêu giai đoạn 1:** Tập trung hoàn thiện và ổn định 100% khung Tauri + Rust (cửa sổ trong suốt, bắt tọa độ chuột, đo nhịp gõ phím, xử lý va chạm vùng Shutdown).
 
-1. **Trạng thái Nghỉ & Nhìn theo chuột (`idle.png`):**
-   * **Positive:** `masterpiece, best quality, 1girl, phoebe_chibi, cute chibi emoji style, blonde bangs, white hat, blue cross hair clip, purple eyes, gentle smile, standing, simple white background`
-   * **Negative:** `low quality, worst quality, blurry, text, watermark, realistic, 3d, complex background, dark background`
-
-2. **Trạng thái Gõ phím / Cổ vũ (`typing.png`):**
-   * **Positive:** `masterpiece, best quality, 1girl, phoebe_chibi, cute meme chibi style, bright white circular eye highlights, smug proud expression, cheering, raising hands, holding mini golden bell, simple white background`
-   * **Negative:** `low quality, worst quality, complex background, text, cropped`
-
-3. **Trạng thái Hoảng sợ khi chuột vào Shutdown (`panic.png`):**
-   * **Positive:** `masterpiece, best quality, 1girl, phoebe_chibi, dazed confused pose, crying, teary purple eyes, opened mouth, raised inner eyebrows, waving hands, panic expression, simple white background`
-   * **Negative:** `low quality, worst quality, complex background, smile, calm`
-
-4. **Trạng thái Bị nhấc lơ lửng (`dragged.png`):**
-   * **Positive:** `masterpiece, best quality, 1girl, phoebe_chibi, dangling pose, suspended in air, kicking legs, surprised pouty expression, flustered, simple white background`
-   * **Negative:** `low quality, worst quality, standing on floor, complex background`
-
-### 5.3. Kịch Bản Hậu Kỳ Tự Động (Post-Processing Pipeline)
-Một script Python chuyên dụng (`tools/process_assets.py`) được xây dựng để thực hiện tự động:
-1. **Chuyển đổi sang Transparent RGBA:** Loại bỏ nền trắng thành nền trong suốt hoàn hảo.
-2. **Bóc tách tròng mắt cho tính năng Eye Tracking:**
-   * Từ bức ảnh `idle.png`, xác định bounding box của 2 mắt.
-   * Cắt rời cặp tròng mắt tím lưu thành `animations/eyes/pupil.png`.
-   * Tô phủ lòng trắng / làm rỗng hốc mắt trên khuôn mặt gốc, lưu thành `animations/eyes/base.png`.
-3. **Đồng bộ hóa vào Engine:** Tự động copy vào thư mục `characters/phoebe_chibi/` và cập nhật thông số `pupil_anchor` vào `manifest.json`.
+### 5.3. Giai Đoạn 2 (Roadmap Tiếp Theo): Nạp Trực Tiếp Spine 2D WebGL
+* Vì Webview2 chạy nhân Chromium hỗ trợ WebGL hoàn hảo, ứng dụng sẽ nhúng thư viện `pixi-spine` hoặc `spine-player` (chỉ vài trăm KB).
+* Nạp thẳng bộ model Spine của Hina (`.skel`/`.json`, `.atlas`, `.png`) để tự động chuyển tiếp giữa các animation:
+  * `Cafe_Idle` ➔ `Cafe_Touch` ➔ `Cafe_Pick` ➔ `Cheer` ➔ `Defeat`.
+* Chuyển động đạt chuẩn 60 FPS mượt mà, RAM tiêu thụ chỉ khoảng **20–30MB**.
 
 ---
 
