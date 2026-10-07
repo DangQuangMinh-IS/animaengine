@@ -22,3 +22,6 @@ dist/
 # Raw / temp assets
 raw_assets/*.tmp
 *.safetensors
+*.log
+out.txt
+err.txt

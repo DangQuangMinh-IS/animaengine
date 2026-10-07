@@ -22,7 +22,14 @@ struct TypingPayload {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
+    use std::io::Write;
+    let _ = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open("F:\\project\\animaengine\\app.log")
+        .and_then(|mut f| writeln!(f, "lib::run() entered"));
+
+    let res = tauri::Builder::default()
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(
@@ -32,10 +39,17 @@ pub fn run() {
                 )?;
             }
 
-            if let Some(window) = app.get_webview_window("main") {
-                let _ = window.center();
-                let _ = window.show();
-                let _ = window.set_focus();
+            if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open("F:\\project\\animaengine\\app.log") {
+                let _ = writeln!(f, "setup() entered");
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = writeln!(f, "main window found! is_visible: {:?}", window.is_visible());
+                    let _ = window.center();
+                    let _ = window.show();
+                    let _ = window.set_focus();
+                    let _ = writeln!(f, "window.show() called");
+                } else {
+                    let _ = writeln!(f, "WARNING: main window NOT FOUND in app.get_webview_window('main')");
+                }
             }
 
             let app_handle = app.handle().clone();
@@ -43,8 +57,13 @@ pub fn run() {
 
             Ok(())
         })
-        .run(tauri::generate_context!())
-        .expect("error while building tauri application");
+        .run(tauri::generate_context!());
+
+    let _ = std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open("F:\\project\\animaengine\\app.log")
+        .and_then(|mut f| writeln!(f, "Builder::run returned with result: {:?}", res));
 }
 
 /// Khởi chạy luồng nền cảm biến hệ thống (OS Sensors Thread)

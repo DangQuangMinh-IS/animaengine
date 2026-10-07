@@ -2,5 +2,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-  app_lib::run();
+    std::panic::set_hook(Box::new(|info| {
+        let _ = std::fs::write("F:\\project\\animaengine\\app.log", format!("PANIC: {:?}", info));
+    }));
+    let _ = std::fs::write("F:\\project\\animaengine\\app.log", "main() started\n");
+    app_lib::run();
 }
