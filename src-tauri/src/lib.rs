@@ -3,11 +3,19 @@
 
 pub mod sensors;
 
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::thread;
 use std::time::{Duration, Instant};
 use tauri::{AppHandle, Emitter, Manager};
 
-use sensors::{is_in_shutdown_zone, TypingCounter};
+use sensors::{is_in_shutdown_zone, DragTracker, TypingCounter};
+
+static DRAG_REQUESTED: AtomicBool = AtomicBool::new(false);
+
+#[tauri::command]
+fn start_drag_tracking() {
+    DRAG_REQUESTED.store(true, Ordering::SeqCst);
+}
 
 #[derive(Clone, serde::Serialize)]
 struct AlertPayload {
@@ -30,6 +38,7 @@ pub fn run() {
         .and_then(|mut f| writeln!(f, "lib::run() entered"));
 
     let res = tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![start_drag_tracking])
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(
@@ -69,14 +78,31 @@ pub fn run() {
 /// Khởi chạy luồng nền cảm biến hệ thống (OS Sensors Thread)
 fn start_sensor_loop(app: AppHandle) {
     thread::spawn(move || {
+        let mut drag_tracker = DragTracker::new(Duration::from_millis(60));
         let mut typing_counter = TypingCounter::new(Duration::from_millis(1500), 3);
         let mut last_typing_emit = Instant::now() - Duration::from_secs(5);
         let mut last_panic_emit = Instant::now() - Duration::from_secs(5);
 
         loop {
-            thread::sleep(Duration::from_millis(60));
+            thread::sleep(Duration::from_millis(35));
+            let now = Instant::now();
 
-            // 1. Đọc kích thước màn hình chính của Windows
+            // 1. Kiểm tra sự kiện yêu cầu bắt đầu kéo thả từ frontend
+            if DRAG_REQUESTED.swap(false, Ordering::SeqCst) {
+                drag_tracker.start(now);
+            }
+
+            // Đọc trạng thái vật lý của nút chuột trái (0x01 = VK_LBUTTON)
+            let lbutton_down = unsafe {
+                (windows_sys::Win32::UI::Input::KeyboardAndMouse::GetAsyncKeyState(0x01) as u16 & 0x8000) != 0
+            };
+
+            // Nếu người dùng vừa thả chuột ra -> Phát tín hiệu kết thúc kéo thả về frontend
+            if drag_tracker.update(now, lbutton_down) {
+                let _ = app.emit("sensor:drag_ended", ());
+            }
+
+            // 2. Đọc kích thước màn hình chính của Windows
             let (screen_w, screen_h) = unsafe {
                 let w = windows_sys::Win32::UI::WindowsAndMessaging::GetSystemMetrics(
                     windows_sys::Win32::UI::WindowsAndMessaging::SM_CXSCREEN,
@@ -87,7 +113,7 @@ fn start_sensor_loop(app: AppHandle) {
                 (w, h)
             };
 
-            // 2. Đọc tọa độ con trỏ chuột toàn cục
+            // 3. Đọc tọa độ con trỏ chuột toàn cục
             let mut pt = windows_sys::Win32::Foundation::POINT { x: 0, y: 0 };
             let mouse_ok = unsafe {
                 windows_sys::Win32::UI::WindowsAndMessaging::GetCursorPos(&mut pt) != 0

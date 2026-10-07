@@ -77,6 +77,60 @@ impl TypingCounter {
     }
 }
 
+/// Trình theo dõi trạng thái kéo thả chuột (Mouse Drag Tracker)
+/// Duy trì trạng thái nhấc bổng liên tục khi chuột trái đang được nhấn giữ và phát tín hiệu kết thúc ngay khi nhả chuột
+pub struct DragTracker {
+    is_dragging: bool,
+    start_time: Option<Instant>,
+    min_check_delay: Duration,
+}
+
+impl DragTracker {
+    pub fn new(min_check_delay: Duration) -> Self {
+        Self {
+            is_dragging: false,
+            start_time: None,
+            min_check_delay,
+        }
+    }
+
+    pub fn start(&mut self, now: Instant) {
+        self.is_dragging = true;
+        self.start_time = Some(now);
+    }
+
+    pub fn is_dragging(&self) -> bool {
+        self.is_dragging
+    }
+
+    pub fn stop(&mut self) {
+        self.is_dragging = false;
+        self.start_time = None;
+    }
+
+    /// Cập nhật với trạng thái vật lý của nút chuột trái.
+    /// Trả về true nếu người dùng VỪA MỚI nhả chuột kết thúc kéo thả.
+    pub fn update(&mut self, now: Instant, lbutton_down: bool) -> bool {
+        if !self.is_dragging {
+            return false;
+        }
+
+        if let Some(st) = self.start_time {
+            if now.duration_since(st) < self.min_check_delay {
+                return false;
+            }
+        }
+
+        if !lbutton_down {
+            self.is_dragging = false;
+            self.start_time = None;
+            return true;
+        }
+
+        false
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -126,5 +180,34 @@ mod tests {
 
         // Sau 1.5s không gõ nữa -> Hết burst
         assert!(!counter.is_typing_burst(start + Duration::from_millis(1500)));
+    }
+
+    #[test]
+    fn test_drag_tracker_lifecycle() {
+        let mut tracker = DragTracker::new(Duration::from_millis(50));
+        let start = Instant::now();
+
+        // Ban đầu chưa kéo
+        assert!(!tracker.is_dragging());
+        assert!(!tracker.update(start, true));
+
+        // Bắt đầu kéo thả
+        tracker.start(start);
+        assert!(tracker.is_dragging());
+
+        // Trong thời gian min_check_delay (20ms), dù chuột nhả cũng chưa tính (tránh race condition)
+        assert!(!tracker.update(start + Duration::from_millis(20), false));
+        assert!(tracker.is_dragging());
+
+        // Sau 100ms, chuột vẫn đang nhấn giữ (lbutton_down = true) -> Vẫn tiếp tục kéo
+        assert!(!tracker.update(start + Duration::from_millis(100), true));
+        assert!(tracker.is_dragging());
+
+        // Sau 500ms, người dùng nhả chuột (lbutton_down = false) -> Kéo thả kết thúc!
+        assert!(tracker.update(start + Duration::from_millis(500), false));
+        assert!(!tracker.is_dragging());
+
+        // Các tick tiếp theo không phát tín hiệu kết thúc lặp lại
+        assert!(!tracker.update(start + Duration::from_millis(600), false));
     }
 }

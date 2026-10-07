@@ -4,6 +4,7 @@
 
 import { listen } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { invoke } from '@tauri-apps/api/core';
 
 // DOM Elements
 const appContainer = document.getElementById('app');
@@ -125,48 +126,44 @@ function pokeHina() {
 // Thiết lập sự kiện kéo thả & chuột
 function setupMouseInteractions() {
   const currentWindow = getCurrentWindow();
+  let dragStartTime = 0;
+
+  const finishDrag = () => {
+    if (isDragging || currentState === 'dragged') {
+      isDragging = false;
+      setTimeout(() => {
+        if (!isDragging && currentState === 'dragged') {
+          setState('idle');
+        }
+      }, 80);
+    }
+  };
 
   // Kéo thả bằng chuột trái
   chibiWrapper.addEventListener('mousedown', async (e) => {
     if (e.button === 0) { // Chuột trái
       contextMenu.classList.add('hidden');
       isDragging = true;
+      dragStartTime = Date.now();
       setState('dragged');
       
       try {
+        await invoke('start_drag_tracking');
         await currentWindow.startDragging();
       } catch (err) {
         console.warn('Start dragging error:', err);
-      } finally {
-        isDragging = false;
-        setTimeout(() => {
-          if (!isDragging && currentState === 'dragged') {
-            setState('idle');
-          }
-        }, 200);
+        finishDrag();
       }
     }
   });
 
-  window.addEventListener('mouseup', () => {
-    if (isDragging) {
-      isDragging = false;
-      setTimeout(() => {
-        if (!isDragging && currentState === 'dragged') {
-          setState('idle');
-        }
-      }, 200);
-    }
-  });
+  window.addEventListener('mouseup', finishDrag);
 
   // Click vào chibi (Xoa đầu)
-  let lastClickTime = 0;
   chibiWrapper.addEventListener('click', (e) => {
-    const now = Date.now();
-    // Bỏ qua nếu vừa kéo xong
-    if (now - lastClickTime < 300) return;
-    lastClickTime = now;
-    if (!isDragging && currentState === 'idle') {
+    const elapsed = Date.now() - dragStartTime;
+    // Nếu chỉ là click ngắn (< 250ms) thì tính là xoa đầu (poke)
+    if (elapsed < 250) {
       pokeHina();
     }
   });
@@ -238,6 +235,18 @@ async function setupTauriListeners() {
             setState('idle');
           }
         }, 3000);
+      }
+    });
+
+    // 3. Tín hiệu kết thúc kéo thả từ cảm biến OS Rust
+    await listen('sensor:drag_ended', () => {
+      if (isDragging || currentState === 'dragged') {
+        isDragging = false;
+        setTimeout(() => {
+          if (!isDragging && currentState === 'dragged') {
+            setState('idle');
+          }
+        }, 80);
       }
     });
 
