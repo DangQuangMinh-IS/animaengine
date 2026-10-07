@@ -21,3 +21,4 @@ dist/
 
 # Raw / temp assets
 raw_assets/*.tmp
+*.safetensors

@@ -1,0 +1,43 @@
+{
+  "id": "hina",
+  "name": "Sorasaki Hina (Blue Archive)",
+  "version": "1.0.0",
+  "author": "AnimaEngine",
+  "scale": 1.0,
+  "states": {
+    "idle": {
+      "asset": "animations/idle.png",
+      "loop": true,
+      "dialogues": [
+        "Sensei, có việc gì cần tôi giúp không?",
+        "Công việc giấy tờ hôm nay vẫn còn nhiều lắm...",
+        "Ở bên cạnh Sensei thế này... thật yên bình."
+      ]
+    },
+    "typing": {
+      "asset": "animations/typing.png",
+      "loop": true,
+      "sound": "audio/Hina_Cafe_Act_4.ogg.mp3",
+      "dialogues": [
+        "Sensei gõ nhanh thật đấy! Cố lên nhé!",
+        "Tuyệt vời lắm, sắp xong rồi!"
+      ]
+    },
+    "panic_shutdown": {
+      "asset": "animations/panic.png",
+      "sound": "audio/Hina_Cafe_Act_5.ogg.mp3",
+      "dialogues": [
+        "Sensei định tắt máy sao? Đừng mà...",
+        "Còn bao nhiêu công việc của Gehenna chưa xong mà Sensei!"
+      ]
+    },
+    "dragged": {
+      "asset": "animations/dragged.png",
+      "sound": "audio/Hina_Cafe_Act_1.ogg.mp3",
+      "dialogues": [
+        "Oa... Sensei, buông tôi xuống đi mà!",
+        "Tư thế này... xấu hổ chết đi được..."
+      ]
+    }
+  }
+}

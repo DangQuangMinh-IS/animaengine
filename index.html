@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Anima Engine</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app" class="mascot-container">
+      <!-- Bong bóng thoại hội thoại -->
+      <div id="speech-bubble" class="speech-bubble hidden">
+        <span id="speech-text">Sensei, có việc gì cần tôi giúp không?</span>
+        <div class="speech-arrow"></div>
+      </div>
+
+      <!-- Khung nhân vật Chibi Hina -->
+      <div id="chibi-wrapper" class="chibi-wrapper" data-tauri-drag-region>
+        <img id="chibi-img" src="/characters/hina/animations/idle.png" alt="Hina Chibi" draggable="false" />
+      </div>
+
+      <!-- Trình phát âm thanh thoại Sensei -->
+      <audio id="voice-player"></audio>
+
+      <!-- Menu ngữ cảnh (chuột phải) -->
+      <div id="context-menu" class="context-menu hidden">
+        <div class="menu-item" id="menu-poke">Xoa đầu Hina 💕</div>
+        <div class="menu-item" id="menu-mute">Bật/Tắt âm thanh 🔊</div>
+        <div class="menu-divider"></div>
+        <div class="menu-item menu-exit" id="menu-exit">Thoát ứng dụng ✕</div>
+      </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

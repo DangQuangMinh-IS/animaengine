@@ -1,0 +1,26 @@
+{
+  "name": "animaengine",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "tauri": "tauri",
+    "test:py": "python -m unittest discover tests",
+    "test:rs": "cargo test --manifest-path src-tauri/Cargo.toml",
+    "test": "npm run test:py && npm run test:rs"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.12.1",
+    "esbuild": "^0.28.2",
+    "vite": "^8.3.3"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.12.1"
+  }
+}
