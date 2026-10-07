@@ -51,6 +51,27 @@ class TestProcessAssets(unittest.TestCase):
         self.assertEqual(center_pixel[3], 255)
         self.assertEqual(center_pixel[0], 120)
 
+    def test_preserve_pale_skin_interior(self):
+        # Tạo ảnh mẫu: Nền trắng, bao quanh bởi viền đen, bên trong là màu da trắng hồng (251, 240, 234)
+        img = Image.new("RGB", (100, 100), (255, 255, 255))
+        pixels = img.load()
+        for i in range(30, 71):
+            pixels[i, 30] = (20, 20, 20)
+            pixels[i, 70] = (20, 20, 20)
+            pixels[30, i] = (20, 20, 20)
+            pixels[70, i] = (20, 20, 20)
+        for y in range(31, 70):
+            for x in range(31, 70):
+                pixels[x, y] = (251, 240, 234)
+
+        res = remove_white_background(img, threshold=238)
+        # Nền ngoài phải trong suốt
+        self.assertEqual(res.getpixel((0, 0))[3], 0)
+        # Vùng da bên trong KHÔNG ĐƯỢC bị trong suốt
+        face_pixel = res.getpixel((50, 50))
+        self.assertEqual(face_pixel[3], 255)
+        self.assertEqual(face_pixel[:3], (251, 240, 234))
+
     def test_extract_eyes_layers(self):
         # Tạo ảnh mẫu mô phỏng khuôn mặt
         img = Image.new("RGBA", (100, 100), (255, 220, 200, 255))

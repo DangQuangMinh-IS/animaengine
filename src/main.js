@@ -137,6 +137,13 @@ function setupMouseInteractions() {
         await currentWindow.startDragging();
       } catch (err) {
         console.warn('Start dragging error:', err);
+      } finally {
+        isDragging = false;
+        setTimeout(() => {
+          if (!isDragging && currentState === 'dragged') {
+            setState('idle');
+          }
+        }, 200);
       }
     }
   });
@@ -148,7 +155,7 @@ function setupMouseInteractions() {
         if (!isDragging && currentState === 'dragged') {
           setState('idle');
         }
-      }, 300);
+      }, 200);
     }
   });
 

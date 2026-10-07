@@ -15,40 +15,65 @@ from PIL import Image, ImageFilter
 
 def remove_white_background(
     img: Image.Image,
-    threshold: int = 240,
-    feather_radius: int = 2
+    threshold: int = 238,
+    feather_radius: float = 0.5
 ) -> Image.Image:
     """
-    Chuyển đổi các pixel nền trắng/gần trắng (RGB > threshold) thành trong suốt.
-    Hỗ trợ làm mềm viền (feathering) để loại bỏ răng cưa trắng.
+    Tách nền trắng bằng thuật toán Flood-Fill (BFS) xuất phát từ 4 cạnh biên của ảnh.
+    Đảm bảo:
+    - Chỉ pixel nền trắng liên thông với viền ngoài mới bị chuyển thành trong suốt.
+    - Tất cả pixel bên trong nhân vật (kể cả màu da trắng nhạt, mắt, áo sơ mi) giữ nguyên 100% độ đục (Alpha = 255).
+    - Hỗ trợ làm mềm viền (anti-aliasing) nhẹ bằng feathering để không bị răng cưa.
     """
-    rgba = img.convert("RGBA")
-    r, g, b, a = rgba.split()
+    from collections import deque
+    rgb_img = img.convert("RGB")
+    width, height = rgb_img.size
+    pixels = rgb_img.load()
 
-    # Tạo mask: 0 (trong suốt) cho nền trắng, 255 (rõ) cho chủ thể
-    def calc_alpha(r_val, g_val, b_val):
-        # Tính khoảng cách độ sáng tới màu trắng tinh (255, 255, 255)
-        diff = max(255 - r_val, 255 - g_val, 255 - b_val)
-        if diff < (255 - threshold):
-            return 0
-        elif diff < (255 - threshold + 20):
-            # Vùng chuyển tiếp mềm mại
-            return int(255 * (diff - (255 - threshold)) / 20)
-        return 255
+    visited = bytearray(width * height)
+    queue = deque()
 
-    # Vectorized alpha mapping
-    pixels = rgba.load()
-    width, height = rgba.size
+    def is_bg_pixel(x: int, y: int) -> bool:
+        r, g, b = pixels[x, y]
+        return r >= threshold and g >= threshold and b >= threshold
+
+    # 1. Thêm toàn bộ pixel biên ngoài có màu trắng vào hàng đợi BFS
+    for x in range(width):
+        for y in (0, height - 1):
+            idx = y * width + x
+            if not visited[idx] and is_bg_pixel(x, y):
+                visited[idx] = 1
+                queue.append((x, y))
+
     for y in range(height):
-        for x in range(width):
-            pr, pg, pb, pa = pixels[x, y]
-            diff = max(255 - pr, 255 - pg, 255 - pb)
-            if diff < (255 - threshold):
-                pixels[x, y] = (pr, pg, pb, 0)
-            elif diff < (255 - threshold + 20):
-                alpha = int(255 * (diff - (255 - threshold)) / 20)
-                pixels[x, y] = (pr, pg, pb, alpha)
+        for x in (0, width - 1):
+            idx = y * width + x
+            if not visited[idx] and is_bg_pixel(x, y):
+                visited[idx] = 1
+                queue.append((x, y))
 
+    # 2. Lan tỏa Flood Fill khắp các vùng nền trắng bên ngoài
+    while queue:
+        cx, cy = queue.popleft()
+        for dx, dy in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+            nx, ny = cx + dx, cy + dy
+            if 0 <= nx < width and 0 <= ny < height:
+                nidx = ny * width + nx
+                if not visited[nidx] and is_bg_pixel(nx, ny):
+                    visited[nidx] = 1
+                    queue.append((nx, ny))
+
+    # 3. Tạo Alpha Mask: 0 cho vùng ngoài (nền), 255 cho nhân vật bên trong
+    mask_bytes = bytearray(width * height)
+    for i in range(width * height):
+        mask_bytes[i] = 0 if visited[i] else 255
+
+    alpha_mask = Image.frombytes("L", (width, height), bytes(mask_bytes))
+    if feather_radius > 0:
+        alpha_mask = alpha_mask.filter(ImageFilter.GaussianBlur(radius=feather_radius))
+
+    rgba = rgb_img.convert("RGBA")
+    rgba.putalpha(alpha_mask)
     return rgba
 
 
@@ -155,6 +180,9 @@ def process_character_pack(
     required_names = ["idle", "typing", "panic", "dragged"]
     for name in required_names:
         input_file = raw_images_dir / f"{name}.png"
+        if not input_file.exists():
+            input_file = raw_images_dir / f"{name}.jpg"
+
         if input_file.exists():
             img = Image.open(input_file)
             transparent_img = remove_white_background(img)
