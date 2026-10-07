@@ -29,6 +29,21 @@ const CHARACTER_CATALOG = {
   airi: { path: '/characters/airi/manifest.json', defaultType: '3d' }
 };
 
+function logToBackend(msg) {
+  console.log(msg);
+  try {
+    invoke('log_front', { msg: String(msg) }).catch(() => {});
+  } catch {}
+}
+
+window.addEventListener('error', (e) => {
+  logToBackend(`[FATAL JS ERROR] ${e.message} at ${e.filename}:${e.lineno}`);
+});
+
+window.addEventListener('unhandledrejection', (e) => {
+  logToBackend(`[UNHANDLED REJECTION] ${e.reason}`);
+});
+
 // Trạng thái hệ thống
 let currentCharacterId = localStorage.getItem('anima_active_character') || 'hina';
 let currentManifest = null;
@@ -423,9 +438,11 @@ async function setupTauriListeners() {
  * Khởi chạy ứng dụng
  */
 async function init() {
+  logToBackend('[Init] Anima Engine starting...');
   await loadCharacter(currentCharacterId);
   setupMouseInteractions();
   await setupTauriListeners();
+  logToBackend(`[Init] Anima Engine started successfully with character: ${currentCharacterId}`);
 
   setTimeout(() => {
     showSpeech(`Chào Sensei! ${currentManifest?.name || 'Hina'} đã sẵn sàng đồng hành cùng người.`, 4000);

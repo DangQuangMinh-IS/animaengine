@@ -10,6 +10,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:app": "tauri build --no-bundle",
     "tauri": "tauri",
     "test:py": "python -m unittest discover tests",
     "test:rs": "cargo test --manifest-path src-tauri/Cargo.toml",

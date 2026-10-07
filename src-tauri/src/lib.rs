@@ -17,6 +17,14 @@ fn start_drag_tracking() {
     DRAG_REQUESTED.store(true, Ordering::SeqCst);
 }
 
+#[tauri::command]
+fn log_front(msg: String) {
+    use std::io::Write;
+    if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open("F:\\project\\animaengine\\app.log") {
+        let _ = writeln!(f, "[Frontend] {}", msg);
+    }
+}
+
 #[derive(Clone, serde::Serialize)]
 struct AlertPayload {
     r#type: String,
@@ -44,7 +52,7 @@ pub fn run() {
         .and_then(|mut f| writeln!(f, "lib::run() entered"));
 
     let res = tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![start_drag_tracking])
+        .invoke_handler(tauri::generate_handler![start_drag_tracking, log_front])
         .setup(|app| {
             if cfg!(debug_assertions) {
                 app.handle().plugin(
