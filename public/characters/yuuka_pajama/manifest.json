@@ -1,0 +1,99 @@
+{
+  "id": "yuuka_pajama",
+  "name": "Hayase Yuuka - Đồ Ngủ (3D)",
+  "type": "3d",
+  "version": "1.0.0",
+  "author": "AnimaEngine",
+  "model": "model.glb",
+  "scale": 1.0,
+  "camera": {
+    "fov": 32,
+    "distance": 2.5,
+    "targetY": 0.5
+  },
+  "states": {
+    "idle": {
+      "clip": "Cafe_Idle",
+      "loop": true,
+      "sound": "audio/Yuuka_(Pajama)_Lobby_1_1.ogg",
+      "dialogues": [
+        "Sensei, giờ này mà người vẫn chưa ngủ sao? Em đã bảo phải nghỉ ngơi sớm rồi mà!",
+        "Thật là... nếu không có em thì sinh hoạt của Sensei sẽ bừa bộn hết mất.",
+        "Em đã tính toán rồi, nếu thức khuya hiệu suất làm việc ngày mai sẽ giảm 34.7% đấy!"
+      ]
+    },
+    "typing": {
+      "clip": "Victory_Start",
+      "loop": true,
+      "sound": "audio/Yuuka_(Pajama)_Tactic_Victory_1.ogg",
+      "dialogues": [
+        "Sensei gõ phím nhanh thật đấy! Cân bằng sổ sách xong chưa ạ?",
+        "Tốc độ xử lý công việc rất tốt, tiếp tục phát huy nhé Sensei!"
+      ]
+    },
+    "panic_shutdown": {
+      "clip": "Exs_Cutin_01",
+      "sound": "audio/Yuuka_(Pajama)_Tactic_Defeat_1.ogg",
+      "dialogues": [
+        "Sensei đã lưu dữ liệu tài chính chưa mà vội tắt máy thế?!",
+        "Khoan đã Sensei! Chưa đối chiếu bảng thu chi tháng này mà!"
+      ]
+    },
+    "dragged": {
+      "clip": "Formation_Pickup",
+      "sound": "audio/Yuuka_(Pajama)_Lobby_2_1.ogg",
+      "dialogues": [
+        "Oa... Sensei nhấc bổng em lên làm gì thế?! Mau thả em xuống!",
+        "Tư thế này kỳ cục quá đi mất... Sensei ngốc!"
+      ]
+    },
+    "poke": {
+      "clip": "Cafe_Reaction",
+      "sound": "audio/Yuuka_(Pajama)_Lobby_3_1.ogg",
+      "dialogues": [
+        "Sensei đừng có chọc má em mãi chứ! Em đang bận tính toán mà!",
+        "A nhột quá Sensei ơi... Người thật là trẻ con quá đấy."
+      ]
+    },
+    "salute": {
+      "clip": "Victory_Start",
+      "sound": "audio/Yuuka_(Pajama)_LogIn_1_1.ogg",
+      "dialogues": [
+        "Thủ quỹ Hội Học sinh Seminar, Hayase Yuuka điểm danh! Sensei đã sẵn sàng làm việc chưa?",
+        "Chào Sensei! Hôm nay em sẽ giám sát chi tiêu của người thật chặt chẽ đấy!"
+      ]
+    },
+    "praise": {
+      "clip": "Victory_End",
+      "sound": "audio/Yuuka_(Pajama)_Relationship_Up_1.ogg",
+      "dialogues": [
+        "Được Sensei khen ngợi... cũng không tệ lắm. Nhưng em chỉ làm đúng bổn phận thôi mà!",
+        "Cảm ơn Sensei... Thấy Sensei vui vẻ là em cũng vui rồi. 💕"
+      ]
+    },
+    "focus": {
+      "clip": "Cafe_Idle",
+      "sound": "audio/Yuuka_(Pajama)_Lobby_4_1.ogg",
+      "dialogues": [
+        "Được rồi, em sẽ ngồi cạnh đối chiếu số liệu trong khi Sensei làm việc nhé.",
+        "Tập trung cao độ nào Sensei, em sẽ không để ai quấy rầy người đâu."
+      ]
+    },
+    "teatime": {
+      "clip": "Cafe_Reaction",
+      "sound": "audio/Yuuka_(Pajama)_Lobby_5_1.ogg",
+      "dialogues": [
+        "Nghỉ giải lao một chút thôi Sensei, uống chút sữa ấm trước khi đi ngủ nhé.",
+        "Em có chuẩn bị đồ uống ấm này, Sensei nhớ uống để giữ sức khỏe nha."
+      ]
+    },
+    "shake": {
+      "clip": "Formation_Pickup",
+      "sound": "audio/Yuuka_(Pajama)_Lobby_2_2.ogg",
+      "dialogues": [
+        "Oa oa! Sensei lắc mạnh thế này em làm rơi máy tính bỏ túi mất!",
+        "Dừng lại đi mà Sensei, em chóng mặt không nhìn thấy số nữa rồi!"
+      ]
+    }
+  }
+}

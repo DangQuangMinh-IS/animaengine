@@ -131,6 +131,83 @@ impl DragTracker {
     }
 }
 
+/// Trình nhận diện rung lắc chuột khi đang kéo thả (Drag Shake Detector)
+/// Phát hiện người dùng vung lắc chuột qua lại với gia tốc và đổi hướng liên tục
+pub struct ShakeDetector {
+    last_pos: Option<(i32, i32)>,
+    last_dx: i32,
+    reversal_count: usize,
+    reversal_window_start: Instant,
+    last_trigger: Instant,
+    reversal_threshold: usize,
+    min_speed: f64,
+    cooldown: Duration,
+}
+
+impl ShakeDetector {
+    pub fn new(reversal_threshold: usize, min_speed: f64, cooldown: Duration) -> Self {
+        let now = Instant::now();
+        Self {
+            last_pos: None,
+            last_dx: 0,
+            reversal_count: 0,
+            reversal_window_start: now,
+            last_trigger: now - cooldown,
+            reversal_threshold,
+            min_speed,
+            cooldown,
+        }
+    }
+
+    pub fn reset(&mut self) {
+        self.last_pos = None;
+        self.last_dx = 0;
+        self.reversal_count = 0;
+    }
+
+    /// Cập nhật tọa độ chuột khi đang kéo thả.
+    /// Trả về true nếu phát hiện hành vi rung lắc mạnh.
+    pub fn update(&mut self, now: Instant, x: i32, y: i32) -> bool {
+        let Some((last_x, last_y)) = self.last_pos else {
+            self.last_pos = Some((x, y));
+            self.reversal_window_start = now;
+            return false;
+        };
+
+        self.last_pos = Some((x, y));
+
+        let dx = x - last_x;
+        let dy = y - last_y;
+        let speed = ((dx * dx + dy * dy) as f64).sqrt();
+
+        // Cửa sổ trượt 700ms
+        if now.duration_since(self.reversal_window_start) > Duration::from_millis(700) {
+            self.reversal_count = 0;
+            self.reversal_window_start = now;
+        }
+
+        // Kiểm tra nếu tốc độ đủ lớn và đổi hướng trục X
+        if speed >= self.min_speed {
+            if (dx > 0 && self.last_dx < 0) || (dx < 0 && self.last_dx > 0) {
+                self.reversal_count += 1;
+            }
+            if dx != 0 {
+                self.last_dx = dx;
+            }
+        }
+
+        if self.reversal_count >= self.reversal_threshold {
+            if now.duration_since(self.last_trigger) >= self.cooldown {
+                self.last_trigger = now;
+                self.reversal_count = 0;
+                return true;
+            }
+        }
+
+        false
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -209,5 +286,32 @@ mod tests {
 
         // Các tick tiếp theo không phát tín hiệu kết thúc lặp lại
         assert!(!tracker.update(start + Duration::from_millis(600), false));
+    }
+
+    #[test]
+    fn test_shake_detector_lifecycle() {
+        let mut detector = ShakeDetector::new(3, 15.0, Duration::from_secs(3));
+        let start = Instant::now();
+
+        // 1. Kéo mượt một hướng (không đổi hướng) -> Không kích hoạt
+        assert!(!detector.update(start, 100, 100));
+        assert!(!detector.update(start + Duration::from_millis(35), 130, 100));
+        assert!(!detector.update(start + Duration::from_millis(70), 160, 100));
+        assert!(!detector.update(start + Duration::from_millis(105), 190, 100));
+
+        // 2. Lắc nhanh qua lại (đổi hướng liên tục 3 lần với tốc độ >= 15px)
+        let t1 = start + Duration::from_millis(150);
+        assert!(!detector.update(t1, 150, 100)); // dx = -40 (đổi hướng lần 1: từ + sang -)
+        
+        let t2 = t1 + Duration::from_millis(35);
+        assert!(!detector.update(t2, 200, 100)); // dx = +50 (đổi hướng lần 2: từ - sang +)
+        
+        let t3 = t2 + Duration::from_millis(35);
+        // dx = -50 (đổi hướng lần 3: từ + sang -) -> ĐẠT NGƯỠNG RUNG LẮC!
+        assert!(detector.update(t3, 150, 100));
+
+        // 3. Đang trong thời gian cooldown -> Không kích hoạt lại ngay
+        let t4 = t3 + Duration::from_millis(35);
+        assert!(!detector.update(t4, 200, 100));
     }
 }

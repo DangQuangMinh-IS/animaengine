@@ -140,6 +140,107 @@ class TestCharacterPacks(unittest.TestCase):
                 f"Clip '{clip_name}' trong state '{state_name}' không tồn tại trong Airi model.glb",
             )
 
+    def test_3d_character_yuuka_pajama(self):
+        char_dir = CHARACTERS_DIR / "yuuka_pajama"
+        manifest_path = char_dir / "manifest.json"
+        self.assertTrue(manifest_path.exists(), "Manifest Yuuka Pajama 3D phải tồn tại")
+
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            manifest = json.load(f)
+
+        self.assertEqual(manifest.get("id"), "yuuka_pajama")
+        self.assertEqual(manifest.get("type"), "3d")
+
+        model_file = char_dir / manifest.get("model", "model.glb")
+        self.assertTrue(model_file.exists())
+
+        available_clips = extract_glb_animation_names(model_file)
+        states = manifest.get("states", {})
+        for state_name in REQUIRED_INTERACTION_STATES:
+            self.assertIn(state_name, states, f"Thiếu state '{state_name}' trong Yuuka Pajama 3D")
+            clip_name = states[state_name].get("clip")
+            self.assertIn(
+                clip_name,
+                available_clips,
+                f"Clip '{clip_name}' trong state '{state_name}' không tồn tại trong Yuuka Pajama model.glb",
+            )
+
+    def test_3d_character_yuzu(self):
+        char_dir = CHARACTERS_DIR / "yuzu"
+        manifest_path = char_dir / "manifest.json"
+        self.assertTrue(manifest_path.exists(), "Manifest Yuzu 3D phải tồn tại")
+
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            manifest = json.load(f)
+
+        self.assertEqual(manifest.get("id"), "yuzu")
+        self.assertEqual(manifest.get("type"), "3d")
+
+        model_file = char_dir / manifest.get("model", "model.glb")
+        self.assertTrue(model_file.exists())
+
+        available_clips = extract_glb_animation_names(model_file)
+        states = manifest.get("states", {})
+        for state_name in REQUIRED_INTERACTION_STATES:
+            self.assertIn(state_name, states, f"Thiếu state '{state_name}' trong Yuzu 3D")
+            clip_name = states[state_name].get("clip")
+            self.assertIn(
+                clip_name,
+                available_clips,
+                f"Clip '{clip_name}' trong state '{state_name}' không tồn tại trong Yuzu model.glb",
+            )
+
+    def test_3d_character_mika(self):
+        char_dir = CHARACTERS_DIR / "mika"
+        manifest_path = char_dir / "manifest.json"
+        self.assertTrue(manifest_path.exists(), "Manifest Mika 3D phải tồn tại")
+
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            manifest = json.load(f)
+
+        self.assertEqual(manifest.get("id"), "mika")
+        self.assertEqual(manifest.get("type"), "3d")
+
+        model_file = char_dir / manifest.get("model", "model.glb")
+        self.assertTrue(model_file.exists())
+
+        available_clips = extract_glb_animation_names(model_file)
+        states = manifest.get("states", {})
+        for state_name in REQUIRED_INTERACTION_STATES:
+            self.assertIn(state_name, states, f"Thiếu state '{state_name}' trong Mika 3D")
+            clip_name = states[state_name].get("clip")
+            self.assertIn(
+                clip_name,
+                available_clips,
+                f"Clip '{clip_name}' trong state '{state_name}' không tồn tại trong Mika model.glb",
+            )
+
+    def test_3d_character_arisu(self):
+        char_dir = CHARACTERS_DIR / "arisu"
+        manifest_path = char_dir / "manifest.json"
+        self.assertTrue(manifest_path.exists(), "Manifest Arisu 3D phải tồn tại")
+
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            manifest = json.load(f)
+
+        self.assertEqual(manifest.get("id"), "arisu")
+        self.assertEqual(manifest.get("type"), "3d")
+
+        model_file = char_dir / manifest.get("model", "model.glb")
+        self.assertTrue(model_file.exists())
+
+        available_clips = extract_glb_animation_names(model_file)
+        states = manifest.get("states", {})
+        for state_name in REQUIRED_INTERACTION_STATES:
+            self.assertIn(state_name, states, f"Thiếu state '{state_name}' trong Arisu 3D")
+            clip_name = states[state_name].get("clip")
+            self.assertIn(
+                clip_name,
+                available_clips,
+                f"Clip '{clip_name}' trong state '{state_name}' không tồn tại trong Arisu model.glb",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()
+

@@ -1,0 +1,98 @@
+{
+  "id": "arisu",
+  "name": "Tendou Arisu - Hầu Gái Dũng Sĩ (3D)",
+  "type": "3d",
+  "version": "1.0.0",
+  "author": "AnimaEngine",
+  "model": "model.glb",
+  "scale": 1.0,
+  "camera": {
+    "fov": 32,
+    "distance": 2.5,
+    "targetY": 0.5
+  },
+  "states": {
+    "idle": {
+      "clip": "Cafe_Idle",
+      "loop": true,
+      "sound": "audio/Arisu_(Battle)_Lobby_1_1.ogg.mp3",
+      "dialogues": [
+        "Panpaka-pan~! Dũng sĩ Arisu đã đăng nhập vào thế giới của Sensei!",
+        "Arisu đang trong trạng thái hồi phục HP và MP bên cạnh Sensei.",
+        "Nhiệm vụ hôm nay của Sensei là gì? Arisu sẵn sàng nhận quest!"
+      ]
+    },
+    "typing": {
+      "clip": "Victory_Start",
+      "loop": true,
+      "sound": "audio/Arisu_(Battle)_Cafe_monolog_1.ogg.mp3",
+      "dialogues": [
+        "Tốc độ tấn công của Sensei thật kinh ngạc! Critical hit liên tục!",
+        "Thanh tiến trình nhiệm vụ của Sensei đang tăng với tốc độ chóng mặt!"
+      ]
+    },
+    "panic_shutdown": {
+      "clip": "Exs_Cutin",
+      "sound": "audio/Arisu_(Battle)_Lobby_2_2.ogg.mp3",
+      "dialogues": [
+        "Cảnh báo hệ thống! Nguồn năng lượng sắp tắt! Sensei đừng out game vội mà!",
+        "Arisu chưa kịp lưu dữ liệu game của hôm nay, Sensei ơi!"
+      ]
+    },
+    "dragged": {
+      "clip": "Formation_Pickup",
+      "sound": "audio/Arisu_(Battle)_Lobby_3_2.ogg.mp3",
+      "dialogues": [
+        "Oa! Kỹ năng 'Nhấc Bổng Dũng Sĩ' của Sensei đã được kích hoạt!",
+        "Arisu đang bay lơ lửng trên không trung! Cảm giác như được trang bị cánh vậy!"
+      ]
+    },
+    "poke": {
+      "clip": "Cafe_Reaction",
+      "sound": "audio/Arisu_(Battle)_Lobby_4_1.ogg.mp3",
+      "dialogues": [
+        "Chỉ số cảm xúc của Arisu đã tăng thêm 100 điểm nhờ cái chạm của Sensei!",
+        "Hehe~ Arisu rất thích được Sensei xoa đầu!"
+      ]
+    },
+    "salute": {
+      "clip": "Victory_Start",
+      "sound": "audio/Arisu_(Battle)_LogIn_1_1.ogg.mp3",
+      "dialogues": [
+        "Dũng sĩ Arisu xin chào Đấng Chỉ Huy Sensei! Sẵn sàng nghênh chiến!",
+        "Hôm nay Arisu sẽ bảo vệ căn cứ desktop của Sensei khỏi mọi quái vật!"
+      ]
+    },
+    "praise": {
+      "clip": "Victory_End",
+      "sound": "audio/Arisu_(Battle)_Gachaget.ogg.mp3",
+      "dialogues": [
+        "Arisu đã nhận được phần thưởng EXP từ Sensei! Arisu đã Level Up! ✨",
+        "Cảm ơn Sensei! Arisu hứa sẽ trở thành dũng sĩ mạnh nhất để bảo vệ người!"
+      ]
+    },
+    "focus": {
+      "clip": "Cafe_Idle",
+      "dialogues": [
+        "Sensei đang niệm thần chú 'Tập Trung Tuyệt Đối'! Arisu sẽ giữ yên lặng canh gác.",
+        "Chế độ bảo vệ túc trực đã bật. Chúc Sensei cày cuốc thành công!"
+      ]
+    },
+    "teatime": {
+      "clip": "Cafe_Reaction",
+      "sound": "audio/Arisu_(Battle)_Lobby_5_1.ogg.mp3",
+      "dialogues": [
+        "Đã đến lúc dùng bình dược hồi phục 'Trà & Bánh Ngọt'! Mời Sensei nạp năng lượng!",
+        "Uống chút trà thảo mộc này để giải độc mệt mỏi nhé Sensei!"
+      ]
+    },
+    "shake": {
+      "clip": "Formation_Pickup",
+      "sound": "audio/Arisu_(Battle)_Lobby_3_2.ogg.mp3",
+      "dialogues": [
+        "Cảnh báo! Cảm biến con quay hồi chuyển của Arisu bị quá tải rồi!",
+        "Chóng mặt quá Sensei ơi, thanh HP của Arisu sắp tụt về 0 rồi!"
+      ]
+    }
+  }
+}

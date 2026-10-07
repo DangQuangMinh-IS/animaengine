@@ -1,0 +1,97 @@
+{
+  "id": "yuzu",
+  "name": "Hanekawa Yuzu - Thùng Game (3D)",
+  "type": "3d",
+  "version": "1.0.0",
+  "author": "AnimaEngine",
+  "model": "model.glb",
+  "scale": 1.0,
+  "camera": {
+    "fov": 32,
+    "distance": 2.4,
+    "targetY": 0.45
+  },
+  "states": {
+    "idle": {
+      "clip": "Cafe_Idle",
+      "loop": true,
+      "sound": "audio/Yuzu_(Battle)_Lobby_1.ogg.mp3",
+      "dialogues": [
+        "A... Sensei... Ở trong thùng các-tông thế này... an toàn thật đấy...",
+        "Sensei ơi... người có muốn chơi game cùng em một lát không?",
+        "Em... em vẫn luôn ở đây bên cạnh Sensei mà..."
+      ]
+    },
+    "typing": {
+      "clip": "Tactical_Start",
+      "loop": true,
+      "sound": "audio/Yuzu_(Battle)_Cafe_monolog_3.ogg.mp3",
+      "dialogues": [
+        "APM của Sensei... giống hệt game thủ chuyên nghiệp vậy!",
+        "Combo gõ phím của Sensei chuẩn xác quá... Cố lên nhé!"
+      ]
+    },
+    "panic_shutdown": {
+      "clip": "Exs_Cutin_01",
+      "sound": "audio/Yuzu_(Battle)_Cafe_monolog_4.ogg.mp3",
+      "dialogues": [
+        "A... Sensei đừng tắt máy mà, chưa lưu checkpoint của game!",
+        "Chờ... chờ em một chút Sensei ơi!"
+      ]
+    },
+    "dragged": {
+      "clip": "Formation_Pickup",
+      "sound": "audio/Yuzu_(Battle)_Lobby_5.ogg.mp3",
+      "dialogues": [
+        "Oa... Sensei bế cả em lẫn cái thùng đi đâu thế này...",
+        "Thùng của em bị rung lắc rồi... Sensei nhẹ tay thôi nha..."
+      ]
+    },
+    "poke": {
+      "clip": "Cafe_Reaction",
+      "sound": "audio/Yuzu_(Battle)_MemorialLobby_3_1.ogg.mp3",
+      "dialogues": [
+        "A! Sensei... gõ vào thùng làm em giật cả mình...",
+        "Nhưng mà... được Sensei quan tâm thế này... em vui lắm."
+      ]
+    },
+    "salute": {
+      "clip": "Tactical_Start",
+      "sound": "audio/Yuzu_(Battle)_LogIn_1_2.ogg.mp3",
+      "dialogues": [
+        "Trưởng Câu lạc bộ Phát triển Game, Hanekawa Yuzu... Chào Sensei!",
+        "Hôm nay em cũng sẽ cố gắng làm game thật tốt ạ!"
+      ]
+    },
+    "praise": {
+      "clip": "Tactical_Start_Random",
+      "sound": "audio/Yuzu_(Battle)_Gachaget.ogg.mp3",
+      "dialogues": [
+        "Oa... Sensei khen ngợi em sao? Em hạnh phúc quá...",
+        "Em sẽ tiếp tục nỗ lực hơn nữa vì Sensei!"
+      ]
+    },
+    "focus": {
+      "clip": "Cafe_Idle",
+      "dialogues": [
+        "Em sẽ trốn trong này yên lặng viết code, không làm phiền Sensei đâu.",
+        "Sensei cố lên nha, Yuzu luôn cổ vũ người từ trong chiếc hộp này."
+      ]
+    },
+    "teatime": {
+      "clip": "Cafe_Reaction",
+      "dialogues": [
+        "Sensei... cùng ăn bánh snack và chơi thử game mới của em nhé?",
+        "Nghỉ tay một xíu thôi Sensei ơi..."
+      ]
+    },
+    "shake": {
+      "clip": "Formation_Pickup",
+      "sound": "audio/Yuzu_(Battle)_Lobby_5.ogg.mp3",
+      "dialogues": [
+        "Oa oa oa! Chiếc hộp của em quay mòng mòng rồi!",
+        "Sensei ơi chóng mặt quá... cứu em với..."
+      ]
+    }
+  }
+}

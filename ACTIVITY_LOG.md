@@ -119,4 +119,49 @@ Tài liệu này lưu trữ lịch sử các sự kiện, phiên làm việc, l�
   - Mức tiêu thụ CPU: **~0.0% - 0.2% khi idle**, hoạt ảnh 60fps mượt mà.
 - **Trạng thái ứng dụng:** Đã cập nhật thành công và đang chạy ổn định.
 
+---
+
+## Phiên làm việc: 2026-10-07 — Khắc phục rung lắc chuột (Shake), Menu Cài đặt & Character Studio, Tích hợp nhân vật Yuuka, Yuzu, Mika, Arisu
+
+### 1. Mục tiêu phiên làm việc
+- **Khắc phục lỗi tính năng chóng mặt khi lắc chuột**: Xử lý triệt để việc Windows chiếm dụng modal drag loop chặn sự kiện DOM `mousemove` bằng cách phát hiện rung lắc trực tiếp từ Win32 API trên luồng cảm biến Rust và phát tín hiệu `sensor:drag_shake`.
+- **Thêm giao diện ngữ cảnh tinh chỉnh chi tiết (Option Settings & Character Studio)**:
+  - Menu chuột phải có tùy chọn `⚙️ Cài đặt & Tinh chỉnh...` mở modal giao diện hiện đại kính mờ (Glassmorphism).
+  - Tab 1: **Ánh sáng & Đồ họa**: Tinh chỉnh thời gian thực Ambient Light, Key Light, Tông màu ánh sáng (Tint color kèm bảng preset ấm hoàng hôn, xanh dịu, hồng anime), Khoảng cách Camera Zoom, Độ cao trọng tâm Y, Chế độ chất lượng (Cân bằng / Khử răng cưa tối đa).
+  - Tab 2: **Âm thanh & Tương tác**: Điều chỉnh âm lượng Master Volume, Tần suất tự thoại khi nhàn rỗi (15s, 30s, 60s, Tắt), Độ nhạy chóng mặt khi lắc chuột (Cao, Bình thường, Thấp).
+  - Tab 3: **Character Studio**: Hiển thị bộ sưu tập nhân vật đã cài đặt (chuyển đổi nhanh 1-click), Hỗ trợ tự thêm Model 3D (`.glb` / `.gltf`) và Voice riêng với Three.js GLTFLoader tự động đọc danh sách animation clips và gán thông minh vào các trạng thái tương tác (`idle`, `typing`, `dragged`, `poke`, `salute`, `praise`, `shake`).
+- **Tích hợp thêm 4 nhân vật mới với đầy đủ 10 tương tác và voice line chính thức**:
+  - Hayase Yuuka - Đồ Ngủ (3D): 121 file voice lines.
+  - Hanekawa Yuzu - Thùng Game (3D): 10 file voice lines.
+  - Misono Mika - Công Chúa Trinity (3D): 19 file voice lines.
+  - Tendou Arisu - Hầu Gái Dũng Sĩ (3D): 11 file voice lines.
+- **Hiệu ứng đồ họa chóng mặt (Dizzy Shake)**: Bổ sung hoạt ảnh CSS chao đảo nghiêng ngả khi bị lắc mạnh cho cả nhân vật 2D và 3D.
+
+---
+
+### 2. Chi tiết kỹ thuật & Giải pháp
+1. **Phát hiện rung lắc ở tầng OS Hook Rust (`ShakeDetector`)**:
+   - Thêm struct `ShakeDetector` trong `src-tauri/src/sensors.rs` theo dõi sự đổi hướng di chuyển liên tục trên trục X trong cửa sổ trượt 700ms khi người dùng đang giữ chuột trái.
+   - Thêm unit test `test_shake_detector_lifecycle` trong `sensors.rs`.
+   - Kết nối với `start_sensor_loop` trong `src-tauri/src/lib.rs` để phát IPC event `sensor:drag_shake` tức thời.
+   - Kết nối frontend listener `sensor:drag_shake` trong `src/main.js` kích hoạt `triggerAction('shake')` và class `.dizzy-shake`.
+2. **Hệ thống điều khiển thời gian thực (Live Preview & Persistence)**:
+   - Thêm phương thức `setLighting`, `setCameraZoom`, `setQuality` trong `src/renderer3d.js`.
+   - Tự động lưu và khôi phục cài đặt từ `localStorage` (`anima_engine_settings`).
+   - Tự động thay đổi kích thước cửa sổ (`setSize`) khi mở/đóng modal cài đặt để mang lại trải nghiệm tiện nghi nhất.
+3. **Character Studio linh hoạt**:
+   - Sử dụng Three.js `GLTFLoader` chạy trực tiếp trong WebView2 phân tích cấu trúc binary GLB, đọc toàn bộ mảng `animations` và gợi ý tự động regex-based cho 7 hành động chính.
+   - Hỗ trợ lưu trữ character profile vào `localStorage` (`anima_custom_characters`) và nạp ngay lập tức vào runtime.
+
+---
+
+### 3. Kết quả nghiệm thu & Kiểm thử
+- **Tổng số Unit Tests:** **19/19 tests đạt 100% PASS**
+  - Python tests: **14/14 tests PASS** (Kiểm tra toàn vẹn tài nguyên hình ảnh 2D, mô hình 3D GLB, manifest và animation clips cho 8 nhân vật: `hina`, `hina_dress`, `airi`, `hanako`, `yuuka_pajama`, `yuzu`, `mika`, `arisu`).
+  - Rust tests: **5/5 tests PASS** (Cảm biến nhịp gõ phím, vùng shutdown, drag tracking, shake detector, tính toán góc nhìn).
+- **Frontend & Standalone Build:**
+  - Vite compilation: 100% thành công, 0 lỗi.
+  - Tauri Standalone: Đóng gói toàn bộ tài nguyên vào `app.exe` chạy độc lập, offline.
+
+
 

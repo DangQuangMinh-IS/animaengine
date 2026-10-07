@@ -31,15 +31,194 @@
         <div class="menu-item action-btn" data-action="praise">💖 Khen thưởng / Cưng chiều</div>
         <div class="menu-item action-btn" data-action="focus">📖 Cùng tập trung làm việc</div>
         <div class="menu-item action-btn" data-action="teatime">☕ Giờ giải lao / Trà chiều</div>
+        <div class="menu-item action-btn" data-action="shake">🌀 Chóng mặt / Rung lắc</div>
         <div class="menu-divider"></div>
         <div class="menu-header">Chọn nhân vật:</div>
         <div class="menu-item char-option active" data-char="hina">🌸 Hina (2D Chibi)</div>
         <div class="menu-item char-option" data-char="hina_dress">👗 Hina - Dạ Hội (3D)</div>
+        <div class="menu-item char-option" data-char="yuuka_pajama">🧮 Yuuka - Đồ Ngủ (3D)</div>
+        <div class="menu-item char-option" data-char="yuzu">📦 Yuzu - Thùng Game (3D)</div>
+        <div class="menu-item char-option" data-char="mika">👑 Mika - Công Chúa (3D)</div>
+        <div class="menu-item char-option" data-char="arisu">🎮 Arisu - Dũng Sĩ (3D)</div>
         <div class="menu-item char-option" data-char="hanako">🌺 Hanako (3D)</div>
         <div class="menu-item char-option" data-char="airi">🎸 Airi - Band (3D)</div>
         <div class="menu-divider"></div>
+        <div class="menu-item" id="menu-settings">⚙️ Cài đặt & Tinh chỉnh...</div>
         <div class="menu-item" id="menu-mute">Bật/Tắt âm thanh 🔊</div>
         <div class="menu-item menu-exit" id="menu-exit">Thoát ứng dụng ✕</div>
+      </div>
+
+      <!-- Modal Cài đặt & Tinh chỉnh chi tiết (Option Settings & Character Studio) -->
+      <div id="settings-modal" class="settings-modal hidden">
+        <div class="settings-dialog">
+          <div class="settings-header">
+            <div class="settings-title">⚙️ Cài đặt & Tinh chỉnh</div>
+            <button id="settings-close-btn" class="settings-close-btn" title="Đóng">✕</button>
+          </div>
+
+          <div class="settings-tabs">
+            <button class="settings-tab-btn active" data-tab="tab-visuals">🎨 Ánh sáng & Đồ họa</button>
+            <button class="settings-tab-btn" data-tab="tab-audio">🔊 Âm thanh & Tương tác</button>
+            <button class="settings-tab-btn" data-tab="tab-studio">🎭 Nhân vật & Thêm Model</button>
+          </div>
+
+          <div class="settings-content">
+            <!-- TAB 1: Ánh sáng & Đồ họa -->
+            <div class="settings-tab-pane active" id="tab-visuals">
+              <div class="setting-group">
+                <div class="setting-label-row">
+                  <span class="setting-label">Ánh sáng môi trường (Ambient):</span>
+                  <span id="val-ambient" class="val-badge">1.4x</span>
+                </div>
+                <input type="range" id="slider-ambient" min="0.2" max="3.0" step="0.1" value="1.4" class="setting-slider" />
+              </div>
+
+              <div class="setting-group">
+                <div class="setting-label-row">
+                  <span class="setting-label">Ánh sáng chính (Key Light):</span>
+                  <span id="val-keylight" class="val-badge">0.8x</span>
+                </div>
+                <input type="range" id="slider-keylight" min="0.0" max="3.0" step="0.1" value="0.8" class="setting-slider" />
+              </div>
+
+              <div class="setting-group">
+                <span class="setting-label">Màu ánh sáng (Tint Color):</span>
+                <div class="color-picker-row">
+                  <input type="color" id="picker-tint" value="#ffffff" class="setting-color" />
+                  <div class="color-presets">
+                    <button class="color-chip" style="background:#ffffff;" data-color="#ffffff" title="Trắng tự nhiên"></button>
+                    <button class="color-chip" style="background:#ffe9d6;" data-color="#ffe9d6" title="Ấm hoàng hôn"></button>
+                    <button class="color-chip" style="background:#d8eaff;" data-color="#d8eaff" title="Xanh dịu"></button>
+                    <button class="color-chip" style="background:#ffd6f0;" data-color="#ffd6f0" title="Hồng Anime"></button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="setting-group">
+                <div class="setting-label-row">
+                  <span class="setting-label">Khoảng cách Camera (Zoom):</span>
+                  <span id="val-camera-dist" class="val-badge">2.6</span>
+                </div>
+                <input type="range" id="slider-camera-dist" min="1.4" max="4.5" step="0.1" value="2.6" class="setting-slider" />
+              </div>
+
+              <div class="setting-group">
+                <div class="setting-label-row">
+                  <span class="setting-label">Độ cao góc nhìn (Target Y):</span>
+                  <span id="val-camera-y" class="val-badge">0.5</span>
+                </div>
+                <input type="range" id="slider-camera-y" min="0.1" max="1.5" step="0.05" value="0.5" class="setting-slider" />
+              </div>
+
+              <div class="setting-group">
+                <span class="setting-label">Chất lượng hiển thị:</span>
+                <select id="select-quality" class="setting-select">
+                  <option value="balanced" selected>Cân bằng (Tiết kiệm pin & Mượt mà)</option>
+                  <option value="ultra">Chất lượng cao (Khử răng cưa tối đa)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- TAB 2: Âm thanh & Tương tác -->
+            <div class="settings-tab-pane" id="tab-audio">
+              <div class="setting-group">
+                <div class="setting-label-row">
+                  <span class="setting-label">Âm lượng giọng nói:</span>
+                  <span id="val-volume" class="val-badge">100%</span>
+                </div>
+                <input type="range" id="slider-volume" min="0" max="100" step="5" value="100" class="setting-slider" />
+              </div>
+
+              <div class="setting-group">
+                <span class="setting-label">Tần suất tự thoại khi nhàn rỗi:</span>
+                <select id="select-ambient-freq" class="setting-select">
+                  <option value="15000">Nhiều chuyện (15 giây)</option>
+                  <option value="30000" selected>Tiêu chuẩn (30 giây)</option>
+                  <option value="60000">Thỉnh thoảng (1 phút)</option>
+                  <option value="0">Tắt tự thoại</option>
+                </select>
+              </div>
+
+              <div class="setting-group">
+                <span class="setting-label">Độ nhạy chóng mặt khi lắc chuột:</span>
+                <select id="select-shake-sens" class="setting-select">
+                  <option value="high">Nhạy cao (Dễ chóng mặt)</option>
+                  <option value="normal" selected>Bình thường</option>
+                  <option value="low">Thấp (Cần lắc mạnh)</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- TAB 3: Character Studio (Tự thêm Model & Voice) -->
+            <div class="settings-tab-pane" id="tab-studio">
+              <div class="studio-section-title">📦 Bộ sưu tập nhân vật</div>
+              <div id="installed-char-list" class="installed-char-list"></div>
+
+              <div class="studio-divider"></div>
+              <div class="studio-section-title">✨ Tự nạp Model & Voice riêng</div>
+
+              <div class="setting-group">
+                <span class="setting-label">Tên nhân vật mới:</span>
+                <input type="text" id="custom-char-name" class="setting-input" placeholder="Ví dụ: Koyuki (Pajama)" />
+              </div>
+
+              <div class="setting-group">
+                <span class="setting-label">Chọn File Mô Hình 3D (.glb / .gltf):</span>
+                <input type="file" id="custom-model-file" accept=".glb,.gltf" class="setting-file" />
+                <div id="model-inspect-info" class="inspect-info hidden"></div>
+              </div>
+
+              <div id="clip-mapping-container" class="clip-mapping-container hidden">
+                <div class="studio-section-title">🎬 Gán Animation Clips tự động/thủ công:</div>
+                <div class="mapping-grid">
+                  <div class="mapping-item">
+                    <label>Đứng nghỉ (Idle):</label>
+                    <select id="map-clip-idle" class="setting-select clip-dropdown"></select>
+                  </div>
+                  <div class="mapping-item">
+                    <label>Gõ phím (Typing):</label>
+                    <select id="map-clip-typing" class="setting-select clip-dropdown"></select>
+                  </div>
+                  <div class="mapping-item">
+                    <label>Bị nhấc bổng (Dragged):</label>
+                    <select id="map-clip-dragged" class="setting-select clip-dropdown"></select>
+                  </div>
+                  <div class="mapping-item">
+                    <label>Xoa đầu (Poke):</label>
+                    <select id="map-clip-poke" class="setting-select clip-dropdown"></select>
+                  </div>
+                  <div class="mapping-item">
+                    <label>Chào Sensei (Salute):</label>
+                    <select id="map-clip-salute" class="setting-select clip-dropdown"></select>
+                  </div>
+                  <div class="mapping-item">
+                    <label>Khen ngợi (Praise):</label>
+                    <select id="map-clip-praise" class="setting-select clip-dropdown"></select>
+                  </div>
+                  <div class="mapping-item">
+                    <label>Lắc chóng mặt (Shake):</label>
+                    <select id="map-clip-shake" class="setting-select clip-dropdown"></select>
+                  </div>
+                </div>
+
+                <div class="studio-section-title" style="margin-top: 10px;">🎙️ Chọn File Âm Thanh (Tùy chọn):</div>
+                <div class="setting-group">
+                  <span class="setting-label">Voice khi chào / click:</span>
+                  <input type="file" id="custom-voice-file" accept="audio/*" class="setting-file" />
+                </div>
+              </div>
+
+              <button id="btn-save-custom-char" class="studio-btn-primary" disabled>
+                💾 Lưu & Kích hoạt nhân vật này
+              </button>
+            </div>
+          </div>
+
+          <div class="settings-footer">
+            <button id="btn-reset-settings" class="settings-btn-secondary">↺ Mặc định</button>
+            <button id="btn-save-settings" class="settings-btn-primary">✓ Lưu thiết lập</button>
+          </div>
+        </div>
       </div>
     </div>
     <script type="module" src="/src/main.js"></script>

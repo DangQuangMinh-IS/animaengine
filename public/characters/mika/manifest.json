@@ -1,0 +1,98 @@
+{
+  "id": "mika",
+  "name": "Misono Mika - Công Chúa Trinity (3D)",
+  "type": "3d",
+  "version": "1.0.0",
+  "author": "AnimaEngine",
+  "model": "model.glb",
+  "scale": 1.0,
+  "camera": {
+    "fov": 32,
+    "distance": 2.5,
+    "targetY": 0.5
+  },
+  "states": {
+    "idle": {
+      "clip": "Cafe_Idle",
+      "loop": true,
+      "sound": "audio/Mika_(Swimsuit)_Lobby_2_1.ogg.mp3",
+      "dialogues": [
+        "Sensei ơi~ Hôm nay người có muốn nghe Mika kể chuyện không?",
+        "Woa~ Ở bên cạnh Sensei lúc nào cũng lấp lánh như những vì sao vậy!",
+        "Kyah~ Sensei đang ngắm Mika đúng không nè? Mika biết ngay mà!"
+      ]
+    },
+    "typing": {
+      "clip": "Victory_Start",
+      "loop": true,
+      "sound": "audio/Mika_(Swimsuit)_Cafe_monolog_1.ogg.mp3",
+      "dialogues": [
+        "Sensei gõ phím nhìn ngầu ghê á! Mika cổ vũ hết mình nha!",
+        "Yeah yeah! Hoàn thành công việc rồi cùng đi chơi với Mika nào!"
+      ]
+    },
+    "panic_shutdown": {
+      "clip": "Exs",
+      "sound": "audio/Mika_(Swimsuit)_Cafe_monolog_4.ogg.mp3",
+      "dialogues": [
+        "Aaaa! Sensei tắt máy là bỏ rơi Mika một mình đó nha! Không chịu đâu!",
+        "Đừng mà Sensei, ở lại chơi với Mika thêm chút nữa đi mà..."
+      ]
+    },
+    "dragged": {
+      "clip": "Formation_Pickup",
+      "sound": "audio/Mika_(Swimsuit)_Lobby_3_1.ogg.mp3",
+      "dialogues": [
+        "Woa~ Bế bổng Mika lên như công chúa nè! Thích quá đi!",
+        "Sensei tính đưa Mika đi đâu đấy hửm? Fufu~"
+      ]
+    },
+    "poke": {
+      "clip": "Cafe_Reaction",
+      "sound": "audio/Mika_(Swimsuit)_Cafe_monolog_2.ogg.mp3",
+      "dialogues": [
+        "Nhột quá nè Sensei ơi~ Chọc má Mika hoài à!",
+        "Mika cũng chọc lại Sensei cho coi! Hehe~"
+      ]
+    },
+    "salute": {
+      "clip": "Victory_Start",
+      "sound": "audio/Mika_(Swimsuit)_LogIn_1.ogg.mp3",
+      "dialogues": [
+        "Công chúa của Sensei, Misono Mika có mặt! Chúc Sensei một ngày tuyệt vời nha!",
+        "Chào Sensei yêu quý nhất của Mika!"
+      ]
+    },
+    "praise": {
+      "clip": "Victory_End",
+      "sound": "audio/Mika_(Swimsuit)_Gachaget.ogg.mp3",
+      "dialogues": [
+        "Kyah~ Được Sensei khen là Mika vui cả ngày luôn á! Yêu Sensei nhất trần đời! 💕",
+        "Sensei lúc nào cũng dịu dàng với Mika như vậy hết trơn á~"
+      ]
+    },
+    "focus": {
+      "clip": "Cafe_Idle",
+      "dialogues": [
+        "Sensei làm việc đi nè, Mika sẽ ngồi ngắm Sensei thật ngoan!",
+        "Sensei tập trung trông quyến rũ cực kỳ luôn á nha~"
+      ]
+    },
+    "teatime": {
+      "clip": "Cafe_Reaction",
+      "sound": "audio/Mika_(Swimsuit)_Lobby_4_2.ogg.mp3",
+      "dialogues": [
+        "Trà bánh của Trinity đã sẵn sàng! Sensei nghỉ tay ăn cùng Mika đi!",
+        "Bánh ngọt cuộn kem dâu tây ngon tuyệt đỉnh luôn này Sensei!"
+      ]
+    },
+    "shake": {
+      "clip": "Formation_Pickup",
+      "sound": "audio/Mika_(Swimsuit)_Lobby_3_1.ogg.mp3",
+      "dialogues": [
+        "Oa oa oa! Sensei lắc Mika như bay lượn trên mây vậy á!",
+        "Chóng mặt quá rồi Sensei ơi, đỡ Mika với nào~"
+      ]
+    }
+  }
+}

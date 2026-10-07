@@ -8,7 +8,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 use tauri::{AppHandle, Emitter, Manager};
 
-use sensors::{is_in_shutdown_zone, DragTracker, TypingCounter};
+use sensors::{is_in_shutdown_zone, DragTracker, ShakeDetector, TypingCounter};
 
 static DRAG_REQUESTED: AtomicBool = AtomicBool::new(false);
 
@@ -93,6 +93,7 @@ pub fn run() {
 fn start_sensor_loop(app: AppHandle) {
     thread::spawn(move || {
         let mut drag_tracker = DragTracker::new(Duration::from_millis(60));
+        let mut shake_detector = ShakeDetector::new(3, 16.0, Duration::from_secs(3));
         let mut typing_counter = TypingCounter::new(Duration::from_millis(1500), 3);
         let mut last_typing_emit = Instant::now() - Duration::from_secs(5);
         let mut last_panic_emit = Instant::now() - Duration::from_secs(5);
@@ -106,6 +107,7 @@ fn start_sensor_loop(app: AppHandle) {
             // 1. Kiểm tra sự kiện yêu cầu bắt đầu kéo thả từ frontend
             if DRAG_REQUESTED.swap(false, Ordering::SeqCst) {
                 drag_tracker.start(now);
+                shake_detector.reset();
             }
 
             // Đọc trạng thái vật lý của nút chuột trái (0x01 = VK_LBUTTON)
@@ -115,6 +117,7 @@ fn start_sensor_loop(app: AppHandle) {
 
             // Nếu người dùng vừa thả chuột ra -> Phát tín hiệu kết thúc kéo thả về frontend
             if drag_tracker.update(now, lbutton_down) {
+                shake_detector.reset();
                 let _ = app.emit("sensor:drag_ended", ());
             }
 
@@ -136,6 +139,15 @@ fn start_sensor_loop(app: AppHandle) {
             };
 
             if mouse_ok {
+                // Kiểm tra rung lắc mạnh khi đang nhấc bổng mascot
+                if drag_tracker.is_dragging() {
+                    if shake_detector.update(now, pt.x, pt.y) {
+                        let _ = app.emit("sensor:drag_shake", ());
+                    }
+                } else {
+                    shake_detector.reset();
+                }
+
                 // Phát sự kiện di chuyển chuột toàn cục cho 3D Look-at (tối đa ~25Hz)
                 if (pt.x != last_mouse_pos.0 || pt.y != last_mouse_pos.1)
                     && last_mouse_emit.elapsed() >= Duration::from_millis(40)

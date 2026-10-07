@@ -25,3 +25,5 @@ raw_assets/*.tmp
 *.log
 out.txt
 err.txt
+model/
+voice line/

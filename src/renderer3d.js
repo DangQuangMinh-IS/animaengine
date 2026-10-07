@@ -55,20 +55,60 @@ export class ThreeMascotRenderer {
     this.renderer.toneMapping = THREE.NoToneMapping;
 
     // 4. Ánh sáng phong cách Anime (Sáng đều, màu sắc tươi tắn)
-    const ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
-    this.scene.add(ambientLight);
+    this.ambientLight = new THREE.AmbientLight(0xffffff, 1.4);
+    this.scene.add(this.ambientLight);
 
-    const keyLight = new THREE.DirectionalLight(0xffffff, 0.8);
-    keyLight.position.set(1.5, 3, 2);
-    this.scene.add(keyLight);
+    this.keyLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    this.keyLight.position.set(1.5, 3, 2);
+    this.scene.add(this.keyLight);
 
-    const fillLight = new THREE.DirectionalLight(0xffeedd, 0.4);
-    fillLight.position.set(-1.5, 1, 1);
-    this.scene.add(fillLight);
+    this.fillLight = new THREE.DirectionalLight(0xffeedd, 0.4);
+    this.fillLight.position.set(-1.5, 1, 1);
+    this.scene.add(this.fillLight);
 
     // 5. Bắt đầu Render loop
     this.animate = this.animate.bind(this);
     this.animate();
+  }
+
+  /**
+   * Tinh chỉnh ánh sáng thời gian thực
+   */
+  setLighting({ ambientIntensity = null, keyIntensity = null, tintColor = null }) {
+    if (ambientIntensity !== null && this.ambientLight) {
+      this.ambientLight.intensity = Number(ambientIntensity);
+    }
+    if (keyIntensity !== null && this.keyLight) {
+      this.keyLight.intensity = Number(keyIntensity);
+    }
+    if (tintColor && this.ambientLight) {
+      this.ambientLight.color.set(tintColor);
+    }
+  }
+
+  /**
+   * Tinh chỉnh Camera / Zoom khoảng cách
+   */
+  setCameraZoom(distance, targetY = null) {
+    if (!this.camera) return;
+    if (distance) this.camera.position.z = Number(distance);
+    if (targetY !== null) {
+      this.camera.position.y = Number(targetY);
+      this.camera.lookAt(0, Number(targetY), 0);
+    }
+    this.camera.updateProjectionMatrix();
+  }
+
+  /**
+   * Tinh chỉnh chất lượng hiển thị
+   */
+  setQuality(quality) {
+    if (!this.renderer) return;
+    if (quality === 'ultra') {
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 3));
+    } else {
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    }
   }
 
   /**

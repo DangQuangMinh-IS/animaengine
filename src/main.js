@@ -1,10 +1,18 @@
 /**
  * src/main.js - Trình điều phối hoạt ảnh và trạng thái Mascot Đa Nhân Vật (2D & 3D)
+ * Hỗ trợ:
+ * - Hệ thống nhân vật Hybrid (Hina 2D, Hina Dạ Hội 3D, Yuuka Đồ Ngủ 3D, Yuzu Thùng Game 3D, Mika 3D, Arisu 3D, Hanako 3D, Airi 3D)
+ * - Tự thêm Model & Voice riêng qua Character Studio với Three.js GLTFLoader & Auto Clip Mapping
+ * - Modal Cài đặt & Tinh chỉnh chi tiết (Ánh sáng, Màu sắc, Zoom Camera, Âm lượng, Tần suất tự thoại, Khử răng cưa)
+ * - Nhận diện rung lắc chuột (Drag Shake) từ cả OS Hook Rust backend lẫn Webview
+ * - Hiệu ứng chóng mặt (Dizzy Shake animation) kèm hội thoại và âm thanh tương tác
  */
 
 import { listen } from '@tauri-apps/api/event';
 import { getCurrentWindow } from '@tauri-apps/api/window';
+import { LogicalSize } from '@tauri-apps/api/dpi';
 import { invoke } from '@tauri-apps/api/core';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { ThreeMascotRenderer } from './renderer3d.js';
 
 // DOM Elements
@@ -18,16 +26,74 @@ const voicePlayer = document.getElementById('voice-player');
 const contextMenu = document.getElementById('context-menu');
 const menuMute = document.getElementById('menu-mute');
 const menuExit = document.getElementById('menu-exit');
-const charOptionElements = document.querySelectorAll('.char-option');
-const actionButtons = document.querySelectorAll('.action-btn');
+const menuSettings = document.getElementById('menu-settings');
+
+// Settings & Studio elements
+const settingsModal = document.getElementById('settings-modal');
+const settingsCloseBtn = document.getElementById('settings-close-btn');
+const btnResetSettings = document.getElementById('btn-reset-settings');
+const btnSaveSettings = document.getElementById('btn-save-settings');
+const sliderAmbient = document.getElementById('slider-ambient');
+const valAmbient = document.getElementById('val-ambient');
+const sliderKeylight = document.getElementById('slider-keylight');
+const valKeylight = document.getElementById('val-keylight');
+const pickerTint = document.getElementById('picker-tint');
+const sliderCameraDist = document.getElementById('slider-camera-dist');
+const valCameraDist = document.getElementById('val-camera-dist');
+const sliderCameraY = document.getElementById('slider-camera-y');
+const valCameraY = document.getElementById('val-camera-y');
+const selectQuality = document.getElementById('select-quality');
+const sliderVolume = document.getElementById('slider-volume');
+const valVolume = document.getElementById('val-volume');
+const selectAmbientFreq = document.getElementById('select-ambient-freq');
+const selectShakeSens = document.getElementById('select-shake-sens');
+const installedCharList = document.getElementById('installed-char-list');
+const customModelFile = document.getElementById('custom-model-file');
+const customVoiceFile = document.getElementById('custom-voice-file');
+const customCharName = document.getElementById('custom-char-name');
+const modelInspectInfo = document.getElementById('model-inspect-info');
+const clipMappingContainer = document.getElementById('clip-mapping-container');
+const btnSaveCustomChar = document.getElementById('btn-save-custom-char');
 
 // Danh sách các nhân vật được hỗ trợ
 const CHARACTER_CATALOG = {
-  hina: { path: '/characters/hina/manifest.json', defaultType: '2d' },
-  hina_dress: { path: '/characters/hina_dress/manifest.json', defaultType: '3d' },
-  hanako: { path: '/characters/hanako/manifest.json', defaultType: '3d' },
-  airi: { path: '/characters/airi/manifest.json', defaultType: '3d' }
+  hina: { path: '/characters/hina/manifest.json', defaultType: '2d', name: '🌸 Hina (2D Chibi)' },
+  hina_dress: { path: '/characters/hina_dress/manifest.json', defaultType: '3d', name: '👗 Hina - Dạ Hội (3D)' },
+  yuuka_pajama: { path: '/characters/yuuka_pajama/manifest.json', defaultType: '3d', name: '🧮 Yuuka - Đồ Ngủ (3D)' },
+  yuzu: { path: '/characters/yuzu/manifest.json', defaultType: '3d', name: '📦 Yuzu - Thùng Game (3D)' },
+  mika: { path: '/characters/mika/manifest.json', defaultType: '3d', name: '👑 Mika - Công Chúa (3D)' },
+  arisu: { path: '/characters/arisu/manifest.json', defaultType: '3d', name: '🎮 Arisu - Dũng Sĩ (3D)' },
+  hanako: { path: '/characters/hanako/manifest.json', defaultType: '3d', name: '🌺 Hanako (3D)' },
+  airi: { path: '/characters/airi/manifest.json', defaultType: '3d', name: '🎸 Airi - Band (3D)' }
 };
+
+// Cấu hình mặc định
+const DEFAULT_SETTINGS = {
+  ambientIntensity: 1.4,
+  keyIntensity: 0.8,
+  tintColor: '#ffffff',
+  cameraDistance: 2.6,
+  cameraTargetY: 0.5,
+  volume: 100,
+  ambientFreq: 30000,
+  shakeSens: 'normal',
+  quality: 'balanced'
+};
+
+let appSettings = Object.assign({}, DEFAULT_SETTINGS);
+try {
+  const saved = localStorage.getItem('anima_engine_settings');
+  if (saved) Object.assign(appSettings, JSON.parse(saved));
+} catch {}
+
+// Tải nhân vật tùy chỉnh do người dùng thêm
+let customCharacters = {};
+try {
+  customCharacters = JSON.parse(localStorage.getItem('anima_custom_characters') || '{}');
+  Object.assign(CHARACTER_CATALOG, customCharacters);
+} catch (e) {
+  console.warn('[Storage] Error loading custom characters:', e);
+}
 
 function logToBackend(msg) {
   console.log(msg);
@@ -65,6 +131,21 @@ try {
 }
 
 /**
+ * Áp dụng thiết lập ánh sáng, camera và chất lượng vào 3D Renderer
+ */
+function applyActiveSettingsToRenderer() {
+  if (renderer3d) {
+    renderer3d.setLighting({
+      ambientIntensity: appSettings.ambientIntensity,
+      keyIntensity: appSettings.keyIntensity,
+      tintColor: appSettings.tintColor
+    });
+    renderer3d.setCameraZoom(appSettings.cameraDistance, appSettings.cameraTargetY);
+    renderer3d.setQuality(appSettings.quality);
+  }
+}
+
+/**
  * Tải manifest của nhân vật được chọn và thiết lập Renderer tương ứng (2D hoặc 3D)
  */
 async function loadCharacter(charId) {
@@ -73,17 +154,22 @@ async function loadCharacter(charId) {
   localStorage.setItem('anima_active_character', charId);
 
   // Cập nhật giao diện menu ngữ cảnh
-  charOptionElements.forEach((el) => {
+  document.querySelectorAll('.char-option').forEach((el) => {
     if (el.dataset.char === charId) {
       el.classList.add('active');
     } else {
       el.classList.remove('active');
     }
   });
+  renderInstalledCharList();
 
   try {
-    const res = await fetch(charConfig.path);
-    currentManifest = await res.json();
+    if (charConfig.manifest) {
+      currentManifest = charConfig.manifest;
+    } else {
+      const res = await fetch(charConfig.path);
+      currentManifest = await res.json();
+    }
     logToBackend(`[Character] Loaded manifest for "${charId}": ${currentManifest.name}`);
   } catch (err) {
     logToBackend(`[Character ERROR] Failed to load manifest for "${charId}": ${err}`);
@@ -99,10 +185,12 @@ async function loadCharacter(charId) {
       renderer3d = new ThreeMascotRenderer(chibiCanvas);
     }
 
-    const modelUrl = `/characters/${charId}/${currentManifest.model || 'model.glb'}`;
+    const modelUrl = currentManifest.customBlobUrl || `/characters/${charId}/${currentManifest.model || 'model.glb'}`;
     await renderer3d.loadModel(modelUrl, currentManifest.camera, () => {
       applyStateToRenderer(currentState);
     });
+
+    applyActiveSettingsToRenderer();
   } else {
     // Chế độ 2D
     chibiCanvas.classList.add('hidden');
@@ -133,7 +221,6 @@ function applyStateToRenderer(stateName) {
     if (stateData?.asset) {
       chibiImg.src = `/characters/${currentCharacterId}/${stateData.asset}`;
     } else {
-      // Fallback
       const defaultAssets = {
         idle: '/characters/hina/animations/idle.png',
         typing: '/characters/hina/animations/typing.png',
@@ -176,7 +263,9 @@ function setState(newState, forceUpdate = false, forceDialogue = null, forceSoun
     // Âm thanh
     const sound = forceSound || stateData.sound;
     if (sound) {
-      const soundUrl = sound.startsWith('/') ? sound : `/characters/${currentCharacterId}/${sound}`;
+      const soundUrl = (sound.startsWith('/') || sound.startsWith('blob:'))
+        ? sound
+        : `/characters/${currentCharacterId}/${sound}`;
       playVoice(soundUrl);
     }
   }
@@ -194,10 +283,20 @@ function triggerAction(actionName, customDialogue = null, customSound = null) {
     return;
   }
 
+  // Hiệu ứng chóng mặt khi bị lắc mạnh
+  if (actionName === 'shake') {
+    chibiWrapper.classList.add('dizzy-shake');
+    setTimeout(() => {
+      chibiWrapper.classList.remove('dizzy-shake');
+    }, 2200);
+  }
+
   // 1. Âm thanh
   const sound = customSound || stateData.sound;
   if (sound) {
-    const soundUrl = sound.startsWith('/') ? sound : `/characters/${currentCharacterId}/${sound}`;
+    const soundUrl = (sound.startsWith('/') || sound.startsWith('blob:'))
+      ? sound
+      : `/characters/${currentCharacterId}/${sound}`;
     playVoice(soundUrl);
   }
 
@@ -241,6 +340,7 @@ function playVoice(soundPath) {
   if (isMuted) return;
   try {
     voicePlayer.src = soundPath;
+    voicePlayer.volume = (appSettings.volume ?? 100) / 100;
     voicePlayer.currentTime = 0;
     voicePlayer.play().catch((e) => {
       console.warn('[Audio] Autoplay prevented or error:', e);
@@ -248,6 +348,352 @@ function playVoice(soundPath) {
   } catch (e) {
     console.error('[Audio] Error:', e);
   }
+}
+
+/**
+ * Đóng / Mở Modal Cài đặt & Tinh chỉnh chi tiết
+ */
+async function toggleSettingsModal(open) {
+  if (open) {
+    settingsModal.classList.remove('hidden');
+    contextMenu.classList.add('hidden');
+    syncSettingsUI();
+    renderInstalledCharList();
+    if (currentWindow) {
+      try {
+        await currentWindow.setSize(new LogicalSize(360, 520));
+      } catch {}
+    }
+  } else {
+    settingsModal.classList.add('hidden');
+    if (currentWindow) {
+      try {
+        await currentWindow.setSize(new LogicalSize(320, 400));
+      } catch {}
+    }
+  }
+}
+
+/**
+ * Đồng bộ giá trị giao diện Cài đặt
+ */
+function syncSettingsUI() {
+  if (!sliderAmbient) return;
+  sliderAmbient.value = appSettings.ambientIntensity;
+  valAmbient.textContent = appSettings.ambientIntensity + 'x';
+
+  sliderKeylight.value = appSettings.keyIntensity;
+  valKeylight.textContent = appSettings.keyIntensity + 'x';
+
+  pickerTint.value = appSettings.tintColor;
+
+  sliderCameraDist.value = appSettings.cameraDistance;
+  valCameraDist.textContent = String(appSettings.cameraDistance);
+
+  sliderCameraY.value = appSettings.cameraTargetY;
+  valCameraY.textContent = String(appSettings.cameraTargetY);
+
+  selectQuality.value = appSettings.quality;
+
+  sliderVolume.value = appSettings.volume;
+  valVolume.textContent = appSettings.volume + '%';
+
+  selectAmbientFreq.value = String(appSettings.ambientFreq);
+  selectShakeSens.value = appSettings.shakeSens;
+}
+
+/**
+ * Hiển thị danh sách nhân vật đã cài đặt trong Character Studio
+ */
+function renderInstalledCharList() {
+  if (!installedCharList) return;
+  installedCharList.innerHTML = '';
+
+  Object.keys(CHARACTER_CATALOG).forEach((charId) => {
+    const info = CHARACTER_CATALOG[charId];
+    const isAct = charId === currentCharacterId;
+    const card = document.createElement('div');
+    card.className = `char-card ${isAct ? 'active' : ''}`;
+    const badgeHtml = info.defaultType === '2d'
+      ? '<span class="char-badge-2d">2D</span>'
+      : '<span class="char-badge-3d">3D</span>';
+
+    card.innerHTML = `
+      <div class="char-card-info">
+        ${badgeHtml}
+        <span>${info.name || charId}</span>
+      </div>
+      <button class="char-card-btn">${isAct ? 'Đang dùng' : 'Kích hoạt'}</button>
+    `;
+
+    card.querySelector('.char-card-btn').addEventListener('click', async () => {
+      await loadCharacter(charId);
+      toggleSettingsModal(false);
+      showSpeech(`Đã chuyển sang ${info.name || charId}! 💕`);
+    });
+
+    installedCharList.appendChild(card);
+  });
+}
+
+/**
+ * Thiết lập các sự kiện cho Modal Cài đặt & Character Studio
+ */
+function setupSettingsAndStudio() {
+  // Mở Settings từ Context Menu
+  menuSettings?.addEventListener('click', () => {
+    toggleSettingsModal(true);
+  });
+
+  // Đóng Settings
+  settingsCloseBtn?.addEventListener('click', () => {
+    toggleSettingsModal(false);
+  });
+
+  // Chuyển Tab
+  document.querySelectorAll('.settings-tab-btn').forEach((tabBtn) => {
+    tabBtn.addEventListener('click', () => {
+      document.querySelectorAll('.settings-tab-btn').forEach((b) => b.classList.remove('active'));
+      document.querySelectorAll('.settings-tab-pane').forEach((p) => p.classList.remove('active'));
+
+      tabBtn.classList.add('active');
+      const targetPane = document.getElementById(tabBtn.dataset.tab);
+      if (targetPane) targetPane.classList.add('active');
+    });
+  });
+
+  // Điều khiển Sliders Live
+  sliderAmbient?.addEventListener('input', (e) => {
+    const val = Number(e.target.value);
+    valAmbient.textContent = val + 'x';
+    appSettings.ambientIntensity = val;
+    renderer3d?.setLighting({ ambientIntensity: val });
+  });
+
+  sliderKeylight?.addEventListener('input', (e) => {
+    const val = Number(e.target.value);
+    valKeylight.textContent = val + 'x';
+    appSettings.keyIntensity = val;
+    renderer3d?.setLighting({ keyIntensity: val });
+  });
+
+  pickerTint?.addEventListener('input', (e) => {
+    appSettings.tintColor = e.target.value;
+    renderer3d?.setLighting({ tintColor: e.target.value });
+  });
+
+  document.querySelectorAll('.color-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const col = chip.dataset.color;
+      pickerTint.value = col;
+      appSettings.tintColor = col;
+      renderer3d?.setLighting({ tintColor: col });
+    });
+  });
+
+  sliderCameraDist?.addEventListener('input', (e) => {
+    const val = Number(e.target.value);
+    valCameraDist.textContent = String(val);
+    appSettings.cameraDistance = val;
+    renderer3d?.setCameraZoom(val, appSettings.cameraTargetY);
+  });
+
+  sliderCameraY?.addEventListener('input', (e) => {
+    const val = Number(e.target.value);
+    valCameraY.textContent = String(val);
+    appSettings.cameraTargetY = val;
+    renderer3d?.setCameraZoom(appSettings.cameraDistance, val);
+  });
+
+  selectQuality?.addEventListener('change', (e) => {
+    appSettings.quality = e.target.value;
+    renderer3d?.setQuality(e.target.value);
+  });
+
+  sliderVolume?.addEventListener('input', (e) => {
+    const val = Number(e.target.value);
+    valVolume.textContent = val + '%';
+    appSettings.volume = val;
+    voicePlayer.volume = val / 100;
+  });
+
+  selectAmbientFreq?.addEventListener('change', (e) => {
+    appSettings.ambientFreq = Number(e.target.value);
+    startAmbientTimer();
+  });
+
+  selectShakeSens?.addEventListener('change', (e) => {
+    appSettings.shakeSens = e.target.value;
+  });
+
+  // Lưu cài đặt
+  btnSaveSettings?.addEventListener('click', () => {
+    localStorage.setItem('anima_engine_settings', JSON.stringify(appSettings));
+    showSpeech('Đã lưu thiết lập thành công! ✨', 2500);
+    toggleSettingsModal(false);
+  });
+
+  // Khôi phục mặc định
+  btnResetSettings?.addEventListener('click', () => {
+    appSettings = Object.assign({}, DEFAULT_SETTINGS);
+    syncSettingsUI();
+    applyActiveSettingsToRenderer();
+    voicePlayer.volume = 1.0;
+    startAmbientTimer();
+    showSpeech('Đã khôi phục cài đặt mặc định!', 2500);
+  });
+
+  // Xử lý Character Studio tự thêm Model & Voice
+  let uploadedModelBlobUrl = null;
+  let uploadedVoiceBlobUrl = null;
+  let foundClips = [];
+
+  customModelFile?.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    modelInspectInfo.classList.remove('hidden');
+    modelInspectInfo.textContent = 'Đang phân tích mô hình 3D...';
+
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      uploadedModelBlobUrl = URL.createObjectURL(file);
+
+      const loader = new GLTFLoader();
+      loader.parse(arrayBuffer, '', (gltf) => {
+        foundClips = (gltf.animations || []).map((a) => a.name);
+
+        modelInspectInfo.innerHTML = `
+          <strong>✓ Đã tìm thấy ${foundClips.length} Animation Clips:</strong><br/>
+          <span style="opacity:0.85">${foundClips.slice(0, 8).join(', ')}${foundClips.length > 8 ? '...' : ''}</span>
+        `;
+
+        // Điền vào các dropdown mapping
+        const mappingSelects = [
+          { id: 'map-clip-idle', pattern: /idle/i },
+          { id: 'map-clip-typing', pattern: /start|attack|tactical|victory/i },
+          { id: 'map-clip-dragged', pattern: /pickup|formation/i },
+          { id: 'map-clip-poke', pattern: /reaction|touch|cafe/i },
+          { id: 'map-clip-salute', pattern: /start|victory|login/i },
+          { id: 'map-clip-praise', pattern: /end|victory|gacha/i },
+          { id: 'map-clip-shake', pattern: /pickup|reaction/i }
+        ];
+
+        mappingSelects.forEach(({ id, pattern }) => {
+          const sel = document.getElementById(id);
+          if (!sel) return;
+          sel.innerHTML = '';
+          let matched = false;
+          foundClips.forEach((clip) => {
+            const opt = document.createElement('option');
+            opt.value = clip;
+            opt.textContent = clip;
+            if (!matched && pattern.test(clip)) {
+              opt.selected = true;
+              matched = true;
+            }
+            sel.appendChild(opt);
+          });
+        });
+
+        clipMappingContainer.classList.remove('hidden');
+        btnSaveCustomChar.removeAttribute('disabled');
+        if (!customCharName.value) {
+          customCharName.value = file.name.replace(/\.[^/.]+$/, '');
+        }
+      });
+    } catch (err) {
+      modelInspectInfo.textContent = 'Lỗi phân tích file 3D: ' + err.message;
+    }
+  });
+
+  customVoiceFile?.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      uploadedVoiceBlobUrl = URL.createObjectURL(file);
+    }
+  });
+
+  btnSaveCustomChar?.addEventListener('click', async () => {
+    if (!uploadedModelBlobUrl || foundClips.length === 0) return;
+
+    const charName = customCharName.value.trim() || 'Custom Mascot';
+    const charId = 'custom_' + Date.now();
+
+    const getVal = (id) => document.getElementById(id)?.value || foundClips[0];
+
+    const newManifest = {
+      id: charId,
+      name: `${charName} (Custom 3D)`,
+      type: '3d',
+      customBlobUrl: uploadedModelBlobUrl,
+      camera: { fov: 32, distance: 2.5, targetY: 0.5 },
+      states: {
+        idle: {
+          clip: getVal('map-clip-idle'),
+          loop: true,
+          dialogues: [`Chào Sensei! Tôi là ${charName}. Rất vui được đồng hành cùng người!`]
+        },
+        typing: {
+          clip: getVal('map-clip-typing'),
+          loop: true,
+          dialogues: [`Sensei gõ phím nhanh quá! Cố gắng lên nhé!`]
+        },
+        panic_shutdown: {
+          clip: getVal('map-clip-dragged'),
+          dialogues: [`Khoan đã Sensei, chưa kịp lưu dữ liệu mà!`]
+        },
+        dragged: {
+          clip: getVal('map-clip-dragged'),
+          dialogues: [`Oa... Sensei bế tôi đi đâu thế này!`]
+        },
+        poke: {
+          clip: getVal('map-clip-poke'),
+          dialogues: [`Sensei đừng chọc má tôi chứ nhột lắm!`]
+        },
+        salute: {
+          clip: getVal('map-clip-salute'),
+          dialogues: [`${charName} điểm danh! Chúc Sensei một ngày tuyệt vời!`]
+        },
+        praise: {
+          clip: getVal('map-clip-praise'),
+          dialogues: [`Cảm ơn Sensei đã khen ngợi! Tôi sẽ cố gắng hơn nữa! 💕`]
+        },
+        focus: {
+          clip: getVal('map-clip-idle'),
+          dialogues: [`Tập trung làm việc nào Sensei, tôi luôn ở đây cạnh người.`]
+        },
+        teatime: {
+          clip: getVal('map-clip-poke'),
+          dialogues: [`Nghỉ giải lao một chút uống trà thôi Sensei ơi!`]
+        },
+        shake: {
+          clip: getVal('map-clip-shake'),
+          dialogues: [`Oa oa! Chóng mặt quá rồi Sensei ơi, nhẹ tay thôi!`]
+        }
+      }
+    };
+
+    if (uploadedVoiceBlobUrl) {
+      newManifest.states.idle.sound = uploadedVoiceBlobUrl;
+      newManifest.states.poke.sound = uploadedVoiceBlobUrl;
+      newManifest.states.salute.sound = uploadedVoiceBlobUrl;
+    }
+
+    customCharacters[charId] = {
+      path: null,
+      manifest: newManifest,
+      defaultType: '3d',
+      name: `✨ ${charName} (Custom)`
+    };
+
+    localStorage.setItem('anima_custom_characters', JSON.stringify(customCharacters));
+    CHARACTER_CATALOG[charId] = customCharacters[charId];
+
+    await loadCharacter(charId);
+    toggleSettingsModal(false);
+    showSpeech(`Đã nạp thành công nhân vật mới: ${charName}! ✨`);
+  });
 }
 
 /**
@@ -324,7 +770,7 @@ function setupMouseInteractions() {
   });
 
   // Các nút hành động tương tác nhanh trong menu
-  actionButtons.forEach((btn) => {
+  document.querySelectorAll('.action-btn').forEach((btn) => {
     btn.addEventListener('click', () => {
       contextMenu.classList.add('hidden');
       triggerAction(btn.dataset.action);
@@ -339,8 +785,8 @@ function setupMouseInteractions() {
     showSpeech(isMuted ? 'Đã tắt âm thanh!' : 'Đã bật lại âm thanh!');
   });
 
-  // Chọn nhân vật từ Menu
-  charOptionElements.forEach((optionEl) => {
+  // Chọn nhân vật từ Menu ngữ cảnh
+  document.querySelectorAll('.char-option').forEach((optionEl) => {
     optionEl.addEventListener('click', async () => {
       const selectedId = optionEl.dataset.char;
       if (selectedId && selectedId !== currentCharacterId) {
@@ -361,9 +807,8 @@ function setupMouseInteractions() {
     }
   });
 
-  // Xử lý xoay nhìn theo chuột & Nhận diện lắc chuột (Shake Detection)
+  // Xử lý xoay nhìn theo chuột & Nhận diện lắc chuột Webview fallback
   window.addEventListener('mousemove', (e) => {
-    // Nhận diện rung lắc mạnh khi đang kéo thả
     if (isDragging) {
       const dx = e.clientX - lastMouseX;
       const dy = e.clientY - lastMouseY;
@@ -371,9 +816,10 @@ function setupMouseInteractions() {
       lastMouseX = e.clientX;
       lastMouseY = e.clientY;
 
-      if (speed > 45) {
+      const thresholdSpeed = appSettings.shakeSens === 'high' ? 28 : (appSettings.shakeSens === 'low' ? 55 : 38);
+      if (speed > thresholdSpeed) {
         shakeCounter++;
-        if (shakeCounter >= 4 && Date.now() - lastShakeTime > 4500) {
+        if (shakeCounter >= 3 && Date.now() - lastShakeTime > 3500) {
           lastShakeTime = Date.now();
           shakeCounter = 0;
           triggerAction('shake');
@@ -407,14 +853,16 @@ function setupMouseInteractions() {
 function startAmbientTimer() {
   if (ambientInterval) clearInterval(ambientInterval);
 
+  const freq = appSettings?.ambientFreq ?? 30000;
+  if (!freq || freq <= 0) return;
+
   ambientInterval = setInterval(() => {
-    // Chỉ kích hoạt khi đang Idle, không kéo thả và context menu đóng
-    if (currentState === 'idle' && !isDragging && contextMenu.classList.contains('hidden')) {
-      const ambientChoices = ['focus', 'teatime', 'salute'];
+    if (currentState === 'idle' && !isDragging && contextMenu.classList.contains('hidden') && settingsModal.classList.contains('hidden')) {
+      const ambientChoices = ['focus', 'teatime', 'salute', 'poke'];
       const action = ambientChoices[Math.floor(Math.random() * ambientChoices.length)];
       triggerAction(action);
     }
-  }, 26000); // 26 giây một lần
+  }, freq);
 }
 
 /**
@@ -422,6 +870,12 @@ function startAmbientTimer() {
  */
 async function setupTauriListeners() {
   try {
+    // 0. Cảm biến rung lắc mạnh khi đang kéo thả (OS Native Hook)
+    await listen('sensor:drag_shake', () => {
+      logToBackend('[Sensor] Received sensor:drag_shake -> triggerAction("shake")');
+      triggerAction('shake');
+    });
+
     // 1. Cảm biến nhịp gõ phím toàn cục
     await listen('sensor:typing', () => {
       if (isDragging || currentState === 'panic_shutdown') return;
@@ -429,7 +883,6 @@ async function setupTauriListeners() {
       if (typingTimeout) clearTimeout(typingTimeout);
       setState('typing');
 
-      // Quay lại Idle sau 2.5 giây kể từ lần gõ phím cuối
       typingTimeout = setTimeout(() => {
         if (!isDragging && currentState === 'typing') {
           setState('idle');
@@ -473,7 +926,6 @@ async function setupTauriListeners() {
           const winPos = await currentWindow.outerPosition();
           const globalX = event.payload?.x ?? 0;
           const globalY = event.payload?.y ?? 0;
-          // Trung tâm nhân vật trong cửa sổ 320x400
           const mascotGlobalX = winPos.x + 160;
           const mascotGlobalY = winPos.y + 240;
 
@@ -482,15 +934,13 @@ async function setupTauriListeners() {
           const angle = Math.atan2(dy, dx);
           const distance = Math.sqrt(dx * dx + dy * dy);
           renderer3d.updateMouseLook(angle, distance);
-        } catch {
-          // Ignore
-        }
+        } catch {}
       }
     });
 
     console.log('[Anima Engine] Tauri listeners registered successfully.');
   } catch (err) {
-    console.warn('[Anima Engine] Error setting up Tauri listeners (running in browser mode?):', err);
+    console.warn('[Anima Engine] Error setting up Tauri listeners:', err);
   }
 }
 
@@ -501,6 +951,7 @@ async function init() {
   logToBackend('[Init] Anima Engine starting...');
   await loadCharacter(currentCharacterId);
   setupMouseInteractions();
+  setupSettingsAndStudio();
   await setupTauriListeners();
   startAmbientTimer();
   logToBackend(`[Init] Anima Engine started successfully with character: ${currentCharacterId}`);
