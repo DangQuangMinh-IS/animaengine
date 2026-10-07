@@ -7,9 +7,9 @@
   "model": "model.glb",
   "scale": 1.0,
   "camera": {
-    "fov": 32,
-    "distance": 2.4,
-    "targetY": 0.45
+    "fov": 35,
+    "distance": 2.9,
+    "targetY": 0.43
   },
   "states": {
     "idle": {

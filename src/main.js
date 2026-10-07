@@ -121,6 +121,7 @@ let panicTimeout = null;
 let speechTimeout = null;
 let ambientInterval = null;
 let renderer3d = null;
+let userOverrodeCamera = false;
 
 // Lấy thông tin cửa sổ hiện tại (nếu chạy dưới Tauri)
 let currentWindow = null;
@@ -133,15 +134,29 @@ try {
 /**
  * Áp dụng thiết lập ánh sáng, camera và chất lượng vào 3D Renderer
  */
-function applyActiveSettingsToRenderer() {
+function applyActiveSettingsToRenderer(manifestCamera = null) {
   if (renderer3d) {
     renderer3d.setLighting({
       ambientIntensity: appSettings.ambientIntensity,
       keyIntensity: appSettings.keyIntensity,
       tintColor: appSettings.tintColor
     });
-    renderer3d.setCameraZoom(appSettings.cameraDistance, appSettings.cameraTargetY);
     renderer3d.setQuality(appSettings.quality);
+
+    // Ưu tiên góc nhìn camera tối ưu được đo đạc chuẩn cho từng nhân vật
+    const dist = userOverrodeCamera ? appSettings.cameraDistance : (manifestCamera?.distance ?? appSettings.cameraDistance ?? 3.0);
+    const targetY = userOverrodeCamera ? appSettings.cameraTargetY : (manifestCamera?.targetY ?? appSettings.cameraTargetY ?? 0.46);
+
+    renderer3d.setCameraZoom(dist, targetY);
+
+    if (sliderCameraDist) {
+      sliderCameraDist.value = dist;
+      valCameraDist.textContent = String(dist);
+    }
+    if (sliderCameraY) {
+      sliderCameraY.value = targetY;
+      valCameraY.textContent = String(targetY);
+    }
   }
 }
 
@@ -190,7 +205,7 @@ async function loadCharacter(charId) {
       applyStateToRenderer(currentState);
     });
 
-    applyActiveSettingsToRenderer();
+    applyActiveSettingsToRenderer(currentManifest.camera);
   } else {
     // Chế độ 2D
     chibiCanvas.classList.add('hidden');
@@ -492,6 +507,7 @@ function setupSettingsAndStudio() {
   });
 
   sliderCameraDist?.addEventListener('input', (e) => {
+    userOverrodeCamera = true;
     const val = Number(e.target.value);
     valCameraDist.textContent = String(val);
     appSettings.cameraDistance = val;
@@ -499,6 +515,7 @@ function setupSettingsAndStudio() {
   });
 
   sliderCameraY?.addEventListener('input', (e) => {
+    userOverrodeCamera = true;
     const val = Number(e.target.value);
     valCameraY.textContent = String(val);
     appSettings.cameraTargetY = val;
@@ -535,9 +552,10 @@ function setupSettingsAndStudio() {
 
   // Khôi phục mặc định
   btnResetSettings?.addEventListener('click', () => {
+    userOverrodeCamera = false;
     appSettings = Object.assign({}, DEFAULT_SETTINGS);
     syncSettingsUI();
-    applyActiveSettingsToRenderer();
+    applyActiveSettingsToRenderer(currentManifest?.camera);
     voicePlayer.volume = 1.0;
     startAmbientTimer();
     showSpeech('Đã khôi phục cài đặt mặc định!', 2500);

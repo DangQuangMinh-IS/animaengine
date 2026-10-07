@@ -31,16 +31,16 @@ export class ThreeMascotRenderer {
   }
 
   init() {
-    const width = this.canvas.clientWidth || 280;
-    const height = this.canvas.clientHeight || 280;
+    const width = this.canvas.clientWidth || 320;
+    const height = this.canvas.clientHeight || 350;
 
     // 1. Scene
     this.scene = new THREE.Scene();
 
-    // 2. Camera
-    this.camera = new THREE.PerspectiveCamera(32, width / height, 0.1, 50);
-    this.camera.position.set(0, 0.5, 2.6);
-    this.camera.lookAt(0, 0.5, 0);
+    // 2. Camera (FOV 35 độ tạo góc nhìn thoáng đãng, không bị cấn đạo cụ)
+    this.camera = new THREE.PerspectiveCamera(35, width / height, 0.1, 50);
+    this.camera.position.set(0, 0.45, 3.0);
+    this.camera.lookAt(0, 0.45, 0);
 
     // 3. Renderer (Nền trong suốt, tương thích Webview2)
     this.renderer = new THREE.WebGLRenderer({
@@ -66,9 +66,25 @@ export class ThreeMascotRenderer {
     this.fillLight.position.set(-1.5, 1, 1);
     this.scene.add(this.fillLight);
 
-    // 5. Bắt đầu Render loop
+    // 5. Tự động thích ứng kích thước Canvas (Responsive Window Resize)
+    this.handleResize = this.handleResize.bind(this);
+    window.addEventListener('resize', this.handleResize);
+
+    // 6. Bắt đầu Render loop
     this.animate = this.animate.bind(this);
     this.animate();
+  }
+
+  /**
+   * Tự động điều chỉnh tỷ lệ khung hình khi kích thước Canvas / Cửa sổ thay đổi
+   */
+  handleResize() {
+    if (!this.canvas || !this.renderer || !this.camera) return;
+    const width = this.canvas.clientWidth || 320;
+    const height = this.canvas.clientHeight || 350;
+    this.camera.aspect = width / height;
+    this.camera.updateProjectionMatrix();
+    this.renderer.setSize(width, height);
   }
 
   /**
@@ -134,12 +150,19 @@ export class ThreeMascotRenderer {
           this.currentModel.position.z = -center.z;
           this.currentModel.position.y = -box.min.y;
 
+          // Vô hiệu hóa Frustum Culling để tránh Three.js cắt mất mesh khi xương/đạo cụ vươn rộng
+          this.currentModel.traverse((child) => {
+            if (child.isMesh || child.isSkinnedMesh) {
+              child.frustumCulled = false;
+            }
+          });
+
           this.scene.add(this.currentModel);
 
-          // Căn chỉnh Camera theo cấu hình hoặc kích thước tự động
-          const targetY = cameraConfig?.targetY ?? (size.y * 0.5);
-          const distance = cameraConfig?.distance ?? Math.max(size.y * 1.9, 2.2);
-          const fov = cameraConfig?.fov ?? 32;
+          // Căn chỉnh Camera theo cấu hình hoặc kích thước tự động với lề an toàn (Safe Margin)
+          const targetY = cameraConfig?.targetY ?? (size.y * 0.46);
+          const distance = cameraConfig?.distance ?? Math.max(size.y * 2.3, 2.9);
+          const fov = cameraConfig?.fov ?? 35;
 
           this.camera.fov = fov;
           this.camera.position.set(0, targetY, distance);
@@ -294,6 +317,7 @@ export class ThreeMascotRenderer {
   }
 
   destroy() {
+    window.removeEventListener('resize', this.handleResize);
     if (this.animationFrameId) {
       cancelAnimationFrame(this.animationFrameId);
     }

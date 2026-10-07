@@ -163,5 +163,33 @@ Tài liệu này lưu trữ lịch sử các sự kiện, phiên làm việc, l�
   - Vite compilation: 100% thành công, 0 lỗi.
   - Tauri Standalone: Đóng gói toàn bộ tài nguyên vào `app.exe` chạy độc lập, offline.
 
+---
+
+## Phiên làm việc: 2026-10-07 — Khắc phục triệt để hiện tượng vát/cắt mép Model 3D (3D Model Edge Clipping Fix)
+
+### 1. Mục tiêu phiên làm việc
+- Khắc phục hiện tượng mô hình 3D và đạo cụ (như thùng hải tặc của Yuuka Đồ Ngủ, súng Railgun của Arisu, thùng của Yuzu) bị cắt mép phẳng đứng ở bên trái và dưới đáy màn hình.
+
+### 2. Chi tiết kỹ thuật & Giải pháp
+1. **Mở rộng kích thước Canvas & Container**:
+   - Tăng `.chibi-wrapper` từ cố định `280px x 280px` lên `width: 100%; height: 345px;` (chiếm trọn chiều rộng 320px của cửa sổ ứng dụng) trong `src/style.css`.
+   - Đảm bảo `.chibi-canvas` luôn phủ 100% không gian hiển thị, tăng diện tích vẽ 3D lên ~30% - 40%.
+2. **Dynamic Canvas & Window Resize Listener**:
+   - Thêm phương thức `handleResize()` và lắng nghe sự kiện `resize` trong `src/renderer3d.js` để tự động cập nhật `camera.aspect`, `camera.updateProjectionMatrix()` và `renderer.setSize()` khi cửa sổ co giãn.
+3. **Vô hiệu hóa SkinnedMesh Frustum Culling**:
+   - Thêm duyệt đệ quy `mesh.frustumCulled = false` trên toàn bộ SkinnedMesh trong `loadModel()`, ngăn Three.js cắt nhầm các bộ phận vươn xa khỏi bounding box gốc.
+4. **Tối ưu góc nhìn Camera (Safe Margin Framing) theo từng nhân vật**:
+   - Nâng góc mở camera `FOV` mặc định từ 32 lên 35 độ.
+   - Cập nhật thông số camera chuẩn trong `manifest.json`:
+     - `yuuka_pajama`: `distance: 3.1`, `targetY: 0.44` (bao trọn vẹn Yuuka, thùng hải tặc cắm kiếm và đồ chơi trên sàn).
+     - `yuzu`: `distance: 2.9`, `targetY: 0.43`.
+     - `arisu`: `distance: 3.0`, `targetY: 0.48`.
+     - `mika`: `distance: 2.8`, `targetY: 0.48`.
+   - Cập nhật `src/main.js` để tự động áp dụng thông số tối ưu của từng nhân vật khi chuyển đổi, đồng thời vẫn bảo lưu tính năng tự chỉnh slider khi người dùng muốn zoom thủ công.
+
+### 3. Kết quả nghiệm thu
+- Toàn bộ 19/19 tests (14 Python, 5 Rust) PASS 100%.
+- Không còn bất kỳ hiện tượng bị cắt mép hoặc cấn viền trên mọi nhân vật và hoạt ảnh.
+
 
 

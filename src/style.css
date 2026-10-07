@@ -80,8 +80,9 @@ html, body {
 /* Khung bọc nhân vật chibi */
 .chibi-wrapper {
   position: relative;
-  width: 280px;
-  height: 280px;
+  width: 100%;
+  height: 345px;
+  max-width: 100%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -93,19 +94,29 @@ html, body {
   cursor: grabbing;
 }
 
-.chibi-wrapper img,
+.chibi-wrapper img {
+  max-width: 280px;
+  max-height: 280px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.15));
+  transition: transform 0.12s ease;
+}
+
 .chibi-wrapper canvas {
   width: 100%;
   height: 100%;
   object-fit: contain;
   filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.15));
-  transition: transform 0.12s ease;
 }
 
 .chibi-canvas {
   position: absolute;
   top: 0;
   left: 0;
+  width: 100% !important;
+  height: 100% !important;
   pointer-events: none;
 }
 
