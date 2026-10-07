@@ -191,5 +191,29 @@ Tài liệu này lưu trữ lịch sử các sự kiện, phiên làm việc, l�
 - Toàn bộ 19/19 tests (14 Python, 5 Rust) PASS 100%.
 - Không còn bất kỳ hiện tượng bị cắt mép hoặc cấn viền trên mọi nhân vật và hoạt ảnh.
 
+---
+
+## Phiên làm việc: 2026-10-07 — Dọn dẹp tệp rác, tệp tạm và cấu trúc tài nguyên dự án (Mức 1 & Mức 2)
+
+### 1. Mục tiêu phiên làm việc
+- Thực hiện yêu cầu dọn dẹp các tệp rác, file tạm không dùng và cấu trúc tài nguyên trùng lặp (Mức 1 & Mức 2) theo phê duyệt của người dùng.
+- Giữ nguyên vẹn 100% các file vận hành cốt lõi, kho model/voice dự phòng và toàn bộ tài liệu dự án.
+
+### 2. Chi tiết thực hiện
+1. **Dọn dẹp Mức 1 (Tệp rác & file tạm):**
+   - Đã xóa tệp trọng số LoRA AI cũ `phoebe_chibi_anima_v1.safetensors` (~183.7 MB) tại thư mục gốc.
+   - Đã xóa các file tạm và nhật ký rỗng/cũ: `err.txt` (0 byte), `out.txt` (0 byte), `app.log` (~500 bytes).
+   - Đã xóa thư mục cache của IDE: `.vs/` (~123 KB).
+   - Đã dọn dẹp các thư mục cache bytecode Python: `tests/__pycache__/`, `tools/__pycache__/`.
+2. **Dọn dẹp Mức 2 (Thư mục tài nguyên trùng lặp):**
+   - Đã gỡ bỏ thư mục `characters/` (chứa 45 tệp của bản Hina cũ, ~6.02 MB) khỏi Git và đĩa cục bộ.
+   - Toàn bộ 8 nhân vật chính thức (bao gồm cả Hina 2D bản cập nhật mới nhất đầy đủ 10 tương tác) được quản lý tập trung và duy nhất trong `public/characters/`.
+   - Cập nhật đường dẫn mặc định trong `tools/process_assets.py` và `TECHNICAL_SPECIFICATION.md` sang chuẩn `public/characters/`.
+
+### 3. Kết quả nghiệm thu
+- **Dung lượng giải phóng:** ~190 MB bộ nhớ đĩa.
+- **Kiểm thử tự động:** 19/19 tests (14 Python tests, 5 Rust unit tests) đạt 100% PASS.
+- **Tính toàn vẹn ứng dụng:** Ứng dụng hoạt động ổn định, tài nguyên chuẩn hóa và không có bất kỳ xung đột nào.
+
 
 

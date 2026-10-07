@@ -3,7 +3,7 @@ tools/process_assets.py
 Công cụ tự động hóa xử lý ảnh render từ LoRA:
 1. Tách nền trắng thành nền trong suốt (RGBA Transparent) với kỹ thuật feathering mềm mại.
 2. Tách lớp tròng mắt (pupil.png) và khuôn mặt rỗng hốc mắt (base.png) cho tính năng Eye Tracking.
-3. Đồng bộ hóa vào cấu trúc thư mục characters/phoebe_chibi/ và tạo manifest.json chuẩn.
+3. Đồng bộ hóa vào cấu trúc thư mục public/characters/ và tạo manifest.json chuẩn.
 """
 
 from __future__ import annotations
@@ -170,7 +170,7 @@ def process_character_pack(
     output_dir: Path
 ) -> None:
     """
-    Xử lý toàn bộ ảnh thô và đưa vào thư mục nhân vật characters/phoebe_chibi/
+    Xử lý toàn bộ ảnh thô và đưa vào thư mục nhân vật public/characters/phoebe_chibi/
     """
     anim_dir = output_dir / "animations"
     eyes_dir = anim_dir / "eyes"
@@ -204,7 +204,7 @@ if __name__ == "__main__":
     import sys
     base_path = Path(__file__).resolve().parent.parent
     raw_dir = base_path / "raw_assets"
-    out_dir = base_path / "characters" / "phoebe_chibi"
+    out_dir = base_path / "public" / "characters" / "phoebe_chibi"
     
     if len(sys.argv) > 2:
         raw_dir = Path(sys.argv[1])

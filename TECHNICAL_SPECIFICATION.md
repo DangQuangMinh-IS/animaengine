@@ -158,7 +158,7 @@ Các trạng thái của Phoebe và thứ tự ưu tiên:
 
 ## 4. Đặc Tả Dữ Liệu Nhân Vật (Hina Manifest Schema)
 
-Thư mục nhân vật mặc định: `characters/hina/manifest.json`:
+Thư mục nhân vật mặc định: `public/characters/hina/manifest.json`:
 
 ```json
 {
