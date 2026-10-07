@@ -1,6 +1,7 @@
 {
   "id": "hina",
-  "name": "Sorasaki Hina (Blue Archive)",
+  "name": "Sorasaki Hina (2D Chibi)",
+  "type": "2d",
   "version": "1.0.0",
   "author": "AnimaEngine",
   "scale": 1.0,

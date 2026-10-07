@@ -1,0 +1,59 @@
+{
+  "id": "hina_dress",
+  "name": "Sorasaki Hina - Dạ Hội (3D)",
+  "type": "3d",
+  "version": "1.0.0",
+  "author": "AnimaEngine",
+  "model": "model.glb",
+  "scale": 1.0,
+  "camera": {
+    "fov": 32,
+    "distance": 2.6,
+    "targetY": 0.55
+  },
+  "states": {
+    "idle": {
+      "clip": "Cafe_Idle",
+      "loop": true,
+      "dialogues": [
+        "Sensei, bộ váy dạ hội này có hợp với tôi không?",
+        "Dù mặc váy dạ hội thì công việc vẫn phải làm thôi...",
+        "Ở bên cạnh Sensei thế này... thật yên bình."
+      ]
+    },
+    "typing": {
+      "clip": "Victory_Start",
+      "loop": true,
+      "sound": "/characters/hina/audio/Hina_Cafe_Act_4.ogg.mp3",
+      "dialogues": [
+        "Sensei gõ nhanh thật đấy! Cố lên nhé!",
+        "Tuyệt vời lắm, sắp hoàn thành công việc rồi!"
+      ]
+    },
+    "panic_shutdown": {
+      "clip": "Vital_Panic",
+      "sound": "/characters/hina/audio/Hina_Cafe_Act_5.ogg.mp3",
+      "dialogues": [
+        "Sensei định tắt máy sao? Đừng mà...",
+        "Còn bao nhiêu công việc của Gehenna chưa xong mà Sensei!"
+      ]
+    },
+    "dragged": {
+      "clip": "Formation_Pickup",
+      "sound": "/characters/hina/audio/Hina_Cafe_Act_1.ogg.mp3",
+      "dialogues": [
+        "Oa... Sensei, buông tôi xuống đi mà!",
+        "Tư thế này... xấu hổ chết đi được..."
+      ]
+    },
+    "poke": {
+      "clip": "Cafe_Reaction",
+      "sound": "/characters/hina/audio/Hina_Cafe_Act_2.ogg.mp3",
+      "dialogues": [
+        "Sensei... xoa đầu tôi sao? Thật là...",
+        "Được Sensei chăm sóc thế này... dễ chịu thật đấy.",
+        "Hôm nay Sensei cũng vất vả rồi nhé! 💕"
+      ]
+    }
+  }
+}

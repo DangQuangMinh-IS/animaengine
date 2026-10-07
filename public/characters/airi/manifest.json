@@ -1,0 +1,54 @@
+{
+  "id": "airi",
+  "name": "Kurimura Airi - Band (3D)",
+  "type": "3d",
+  "version": "1.0.0",
+  "author": "AnimaEngine",
+  "model": "model.glb",
+  "scale": 1.0,
+  "camera": {
+    "fov": 32,
+    "distance": 2.5,
+    "targetY": 0.48
+  },
+  "states": {
+    "idle": {
+      "clip": "Cafe_Idle",
+      "loop": true,
+      "dialogues": [
+        "Sensei, cùng ăn kem bạc hà sô cô la không ạ?",
+        "Âm nhạc và đồ ngọt là điều tuyệt vời nhất trên đời!",
+        "Hôm nay Sensei có muốn nghe em chơi thử một đoạn nhạc không?"
+      ]
+    },
+    "typing": {
+      "clip": "NonWeapon_Keyboard",
+      "loop": true,
+      "dialogues": [
+        "Nhịp điệu gõ phím của Sensei nghe như một bản rock sôi động vậy!",
+        "Em cũng gõ phím cùng Sensei nè! 1, 2, 3...!"
+      ]
+    },
+    "panic_shutdown": {
+      "clip": "Vital_Panic",
+      "dialogues": [
+        "Sensei ơi đừng tắt máy mà, kem của em sẽ tan mất!",
+        "Oa oa! Chờ một chút đã Sensei ơi!"
+      ]
+    },
+    "dragged": {
+      "clip": "Formation_Pickup",
+      "dialogues": [
+        "Oaaa! Em đang bay nè Sensei!",
+        "Cẩn thận không làm rơi cây đàn của em đó Sensei ơi~"
+      ]
+    },
+    "poke": {
+      "clip": "Cafe_Reaction",
+      "dialogues": [
+        "A! Sensei làm em suýt làm rơi thìa kem bây giờ!",
+        "Sensei xoa đầu em ạ? Hì hì, thích quá đi!"
+      ]
+    }
+  }
+}

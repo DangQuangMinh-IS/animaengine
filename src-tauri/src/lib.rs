@@ -28,6 +28,12 @@ struct TypingPayload {
     count: usize,
 }
 
+#[derive(Clone, serde::Serialize)]
+struct MousePayload {
+    x: i32,
+    y: i32,
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     use std::io::Write;
@@ -82,6 +88,8 @@ fn start_sensor_loop(app: AppHandle) {
         let mut typing_counter = TypingCounter::new(Duration::from_millis(1500), 3);
         let mut last_typing_emit = Instant::now() - Duration::from_secs(5);
         let mut last_panic_emit = Instant::now() - Duration::from_secs(5);
+        let mut last_mouse_emit = Instant::now() - Duration::from_secs(5);
+        let mut last_mouse_pos = (0i32, 0i32);
 
         loop {
             thread::sleep(Duration::from_millis(35));
@@ -120,6 +128,15 @@ fn start_sensor_loop(app: AppHandle) {
             };
 
             if mouse_ok {
+                // Phát sự kiện di chuyển chuột toàn cục cho 3D Look-at (tối đa ~25Hz)
+                if (pt.x != last_mouse_pos.0 || pt.y != last_mouse_pos.1)
+                    && last_mouse_emit.elapsed() >= Duration::from_millis(40)
+                {
+                    last_mouse_emit = Instant::now();
+                    last_mouse_pos = (pt.x, pt.y);
+                    let _ = app.emit("sensor:mouse", MousePayload { x: pt.x, y: pt.y });
+                }
+
                 // Kiểm tra va chạm vùng nút Start / Shutdown
                 if is_in_shutdown_zone(pt.x, pt.y, screen_w, screen_h) {
                     if last_panic_emit.elapsed() > Duration::from_millis(2500) {

@@ -1,0 +1,54 @@
+{
+  "id": "hanako",
+  "name": "Urawa Hanako (3D)",
+  "type": "3d",
+  "version": "1.0.0",
+  "author": "AnimaEngine",
+  "model": "model.glb",
+  "scale": 1.0,
+  "camera": {
+    "fov": 32,
+    "distance": 2.5,
+    "targetY": 0.5
+  },
+  "states": {
+    "idle": {
+      "clip": "Cafe_Idle",
+      "loop": true,
+      "dialogues": [
+        "Fufu~ Sensei đang nhìn em chăm chú thế?",
+        "Hôm nay Sensei muốn làm gì nào? Hanako sẵn sàng rồi đây~",
+        "Một ngày yên bình bên Sensei thật là tuyệt vời."
+      ]
+    },
+    "typing": {
+      "clip": "Tactical_Start",
+      "loop": true,
+      "dialogues": [
+        "Sensei tập trung làm việc trông quyến rũ lắm đấy~",
+        "Gõ phím chăm chỉ thế này, em phải thưởng cho Sensei thôi!"
+      ]
+    },
+    "panic_shutdown": {
+      "clip": "Exs_Cutin",
+      "dialogues": [
+        "Sensei định tắt máy bỏ lại Hanako một mình ư? Không chịu đâu~",
+        "Đừng vội tắt máy mà Sensei..."
+      ]
+    },
+    "dragged": {
+      "clip": "Formation_Pickup",
+      "dialogues": [
+        "Oa~ Sensei bế em đi đâu thế này?",
+        "Fufu, được Sensei nhấc bổng lên cũng thú vị đấy chứ~"
+      ]
+    },
+    "poke": {
+      "clip": "Cafe_Reaction",
+      "dialogues": [
+        "Nhột quá Sensei ơi~",
+        "Sensei thích chạm vào em như vậy sao? Fufu~"
+      ]
+    }
+  }
+}

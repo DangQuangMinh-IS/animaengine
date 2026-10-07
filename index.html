@@ -14,18 +14,25 @@
         <div class="speech-arrow"></div>
       </div>
 
-      <!-- Khung nhân vật Chibi Hina -->
+      <!-- Khung nhân vật Chibi Mascot (Hỗ trợ 2D Sprite và 3D WebGL Canvas) -->
       <div id="chibi-wrapper" class="chibi-wrapper">
-        <img id="chibi-img" src="/characters/hina/animations/idle.png" alt="Hina Chibi" draggable="false" />
+        <img id="chibi-img" src="/characters/hina/animations/idle.png" alt="Chibi 2D" draggable="false" />
+        <canvas id="chibi-canvas" class="chibi-canvas hidden"></canvas>
       </div>
 
-      <!-- Trình phát âm thanh thoại Sensei -->
+      <!-- Trình phát âm thanh thoại -->
       <audio id="voice-player"></audio>
 
       <!-- Menu ngữ cảnh (chuột phải) -->
       <div id="context-menu" class="context-menu hidden">
-        <div class="menu-item" id="menu-poke">Xoa đầu Hina 💕</div>
+        <div class="menu-item" id="menu-poke">Tương tác / Xoa đầu 💕</div>
         <div class="menu-item" id="menu-mute">Bật/Tắt âm thanh 🔊</div>
+        <div class="menu-divider"></div>
+        <div class="menu-header">Chọn nhân vật:</div>
+        <div class="menu-item char-option active" data-char="hina">🌸 Hina (2D Chibi)</div>
+        <div class="menu-item char-option" data-char="hina_dress">👗 Hina - Dạ Hội (3D)</div>
+        <div class="menu-item char-option" data-char="hanako">🌺 Hanako (3D)</div>
+        <div class="menu-item char-option" data-char="airi">🎸 Airi - Band (3D)</div>
         <div class="menu-divider"></div>
         <div class="menu-item menu-exit" id="menu-exit">Thoát ứng dụng ✕</div>
       </div>
