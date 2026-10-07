@@ -83,14 +83,23 @@ Mỗi nhân vật được đóng gói dưới dạng một thư mục riêng bi
 
 ```text
 characters/
-└── default_mascot/
-    ├── manifest.json       <-- Định nghĩa tên, scale, file asset tương ứng trạng thái
+└── phoebe_chibi/           <-- Nhân vật mặc định: Phoebe (Wuthering Waves)
+    ├── manifest.json       <-- Khai báo thông tin, scale, mapping hoạt ảnh và âm thanh
     ├── preview.png         <-- Ảnh đại diện
     ├── audio/              <-- Hiệu ứng âm thanh (.mp3 / .wav)
-    └── animations/         <-- Hoạt ảnh trong suốt (WebM Alpha / PNG Sequences / GIF)
+    │   ├── poke.mp3
+    │   └── panic.mp3
+    └── animations/         <-- Hoạt ảnh trong suốt (WebM Alpha / PNG Sequences / Layers)
+        ├── idle.webm
+        ├── typing.webm
+        ├── panic.webm
+        ├── drag.webm
+        └── eyes/           <-- Dùng cho tính năng mắt nhìn theo chuột
+            ├── base.png    <-- Khung mặt
+            └── pupil.png   <-- Tròng mắt linh hoạt
 ```
 
-* **Bản MVP:** Đi kèm 1 nhân vật mặc định chuẩn mực, đầy đủ asset cho 5 trạng thái hành vi.
+* **Bản MVP:** Đi kèm **Phoebe (Wuthering Waves)** làm mascot chuẩn mực (Benchmark Mascot) với tạo hình nữ tu Spectro dễ thương, đầy đủ asset cho 5 trạng thái hành vi cốt lõi.
 * **Bản cập nhật tiếp theo:** Cơ chế tự động quét thư mục `characters/` để tải thêm nhân vật mà không cần nạp lại phần mềm.
 
 ---
