@@ -215,5 +215,23 @@ Tài liệu này lưu trữ lịch sử các sự kiện, phiên làm việc, l�
 - **Kiểm thử tự động:** 19/19 tests (14 Python tests, 5 Rust unit tests) đạt 100% PASS.
 - **Tính toàn vẹn ứng dụng:** Ứng dụng hoạt động ổn định, tài nguyên chuẩn hóa và không có bất kỳ xung đột nào.
 
+---
+
+## Phiên làm việc: 2026-10-08 — Xuất bản dự án lên GitHub Repository
+
+### 1. Mục tiêu phiên làm việc
+- Khởi tạo GitHub repository `animaengine` ở chế độ Public theo yêu cầu của người dùng.
+- Liên kết remote `origin` và đồng bộ toàn bộ lịch sử commit cùng mã nguồn lên GitHub.
+
+### 2. Chi tiết thực hiện
+- Sử dụng GitHub CLI (`gh`) xác thực với tài khoản `DangQuangMinh-IS`.
+- Tạo repository công khai: `https://github.com/DangQuangMinh-IS/animaengine`.
+- Cấu hình remote `origin` trỏ tới `https://github.com/DangQuangMinh-IS/animaengine.git`.
+- Đẩy toàn bộ nhánh `master` lên `origin/master`.
+
+### 3. Kết quả nghiệm thu
+- Repository đã hoạt động chính thức trên GitHub tại [https://github.com/DangQuangMinh-IS/animaengine](https://github.com/DangQuangMinh-IS/animaengine).
+
+
 
 
