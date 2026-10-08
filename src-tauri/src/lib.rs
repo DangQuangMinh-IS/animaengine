@@ -17,12 +17,16 @@ fn start_drag_tracking() {
     DRAG_REQUESTED.store(true, Ordering::SeqCst);
 }
 
+fn log_app(msg: &str) {
+    use std::io::Write;
+    if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open("app.log") {
+        let _ = writeln!(f, "{}", msg);
+    }
+}
+
 #[tauri::command]
 fn log_front(msg: String) {
-    use std::io::Write;
-    if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open("F:\\project\\animaengine\\app.log") {
-        let _ = writeln!(f, "[Frontend] {}", msg);
-    }
+    log_app(&format!("[Frontend] {}", msg));
 }
 
 #[derive(Clone, serde::Serialize)]
@@ -44,12 +48,7 @@ struct MousePayload {
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    use std::io::Write;
-    let _ = std::fs::OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open("F:\\project\\animaengine\\app.log")
-        .and_then(|mut f| writeln!(f, "lib::run() entered"));
+    log_app("lib::run() entered");
 
     let res = tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![start_drag_tracking, log_front])
@@ -62,17 +61,15 @@ pub fn run() {
                 )?;
             }
 
-            if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open("F:\\project\\animaengine\\app.log") {
-                let _ = writeln!(f, "setup() entered");
-                if let Some(window) = app.get_webview_window("main") {
-                    let _ = writeln!(f, "main window found! is_visible: {:?}", window.is_visible());
-                    let _ = window.center();
-                    let _ = window.show();
-                    let _ = window.set_focus();
-                    let _ = writeln!(f, "window.show() called");
-                } else {
-                    let _ = writeln!(f, "WARNING: main window NOT FOUND in app.get_webview_window('main')");
-                }
+            log_app("setup() entered");
+            if let Some(window) = app.get_webview_window("main") {
+                log_app(&format!("main window found! is_visible: {:?}", window.is_visible()));
+                let _ = window.center();
+                let _ = window.show();
+                let _ = window.set_focus();
+                log_app("window.show() called");
+            } else {
+                log_app("WARNING: main window NOT FOUND in app.get_webview_window('main')");
             }
 
             let app_handle = app.handle().clone();
@@ -82,11 +79,7 @@ pub fn run() {
         })
         .run(tauri::generate_context!());
 
-    let _ = std::fs::OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open("F:\\project\\animaengine\\app.log")
-        .and_then(|mut f| writeln!(f, "Builder::run returned with result: {:?}", res));
+    log_app(&format!("Builder::run returned with result: {:?}", res));
 }
 
 /// Khởi chạy luồng nền cảm biến hệ thống (OS Sensors Thread)

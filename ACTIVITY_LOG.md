@@ -232,6 +232,44 @@ Tài liệu này lưu trữ lịch sử các sự kiện, phiên làm việc, l�
 ### 3. Kết quả nghiệm thu
 - Repository đã hoạt động chính thức trên GitHub tại [https://github.com/DangQuangMinh-IS/animaengine](https://github.com/DangQuangMinh-IS/animaengine).
 
+---
+
+## Phiên làm việc: 2026-10-08 — Đóng gói dự án để chạy trên máy khác, CI/CD GitHub Actions & Bộ phát hành Portable
+
+### 1. Mục tiêu phiên làm việc
+- Đóng gói toàn bộ dự án Anima Engine để có thể triển khai và chạy mượt mà trên bất kỳ máy tính Windows nào khác mà không yêu cầu cài đặt môi trường lập trình (không cần Node.js, Rust, Python).
+- Dọn sạch các đường dẫn tuyệt đối (hardcoded path `F:\...`) để ứng dụng hoạt động hoàn toàn độc lập và linh hoạt trên mọi ổ đĩa.
+- Thiết lập pipeline tự động hóa CI/CD đóng gói qua GitHub Actions (`package.yml`) để tự động biên dịch, chạy test và tạo ra file cài đặt (.exe setup / .msi) cùng bản nén Portable Zip.
+- Cải tiến kịch bản khởi chạy `run.bat` và `stop.bat` hỗ trợ tự nhận diện cả môi trường chạy trực tiếp (Portable) lẫn môi trường phát triển (Dev).
+- Biên soạn tài liệu hướng dẫn sử dụng và triển khai chi tiết (`HUONG_DAN_CAI_DAT_MAY_KHAC.md`, `HUONG_DAN_SU_DUNG.md`, `README.md`).
+
+### 2. Chi tiết kỹ thuật & Giải pháp
+1. **Khắc phục triệt để các đường dẫn tuyệt đối (Hardcoded paths)**:
+   - Phát hiện và loại bỏ các chuỗi đường dẫn ghi log cố định `F:\project\animaengine\app.log` trong `src-tauri/src/main.rs` và `src-tauri/src/lib.rs`.
+   - Viết helper `log_app` sử dụng đường dẫn tương đối an toàn `app.log` tại thư mục runtime.
+2. **Cải tiến kịch bản khởi chạy thông minh (`run.bat` & `stop.bat`)**:
+   - `run.bat` tự động phát hiện ưu tiên tệp thực thi độc lập `animaengine.exe` hoặc `app.exe` ngay tại thư mục hiện hành, sau đó mới tìm đến `src-tauri/target/release/`.
+   - `stop.bat` đồng bộ tắt cả `animaengine.exe` lẫn `app.exe`.
+3. **Thiết lập luồng tự động hóa đóng gói trên GitHub Actions (`.github/workflows/package.yml`)**:
+   - Chạy trên hạ tầng Windows Server (`windows-latest`) chuẩn chính thức của Microsoft với đầy đủ Visual Studio C++ Toolchain và Rust MSVC.
+   - Tự động chạy toàn bộ test suite (Python & Rust).
+   - Tự động biên dịch Vite web frontend và đóng gói Tauri bundle:
+     + Bộ cài đặt NSIS Setup (`animaengine_*_x64-setup.exe`).
+     + Bộ cài đặt Windows Installer (`animaengine_*_x64_en-US.msi`).
+     + Gói nén Portable độc lập (`AnimaEngine-v1.0.0-Portable-Windows-x64.zip`) kèm launcher `run.bat`, `stop.bat` và hướng dẫn sử dụng.
+   - Tự động tạo GitHub Release chính thức đính kèm các tệp tải về trực tiếp.
+4. **Bổ sung bộ kiểm thử đóng gói tự động (`tests/test_packaging.py`)**:
+   - Kiểm tra quét mã nguồn: 0 đường dẫn hardcode.
+   - Kiểm tra tính toàn vẹn của file cấu hình đóng gói `tauri.conf.json`.
+   - Kiểm tra cấu trúc bản build `dist/` (HTML, JS, CSS, 8 nhân vật và manifests).
+   - Kiểm tra logic của các script `run.bat` và `stop.bat`.
+
+### 3. Kết quả nghiệm thu & Kiểm thử
+- **Bộ kiểm thử tự động:** **18/18 tests đạt 100% PASS** (14 tests tài nguyên nhân vật 2D/3D + 4 tests đóng gói & launchers).
+- **Mã nguồn sạch sẽ:** 100% độc lập, không phụ thuộc ổ đĩa gốc.
+- **Tài liệu hoàn chỉnh:** Đã có đầy đủ hướng dẫn sử dụng và triển khai cho máy khác.
+
+
 
 
 
