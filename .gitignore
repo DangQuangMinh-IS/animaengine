@@ -13,6 +13,7 @@ env/
 # Node
 node_modules/
 dist/
+release/
 
 # IDE
 .vs/
